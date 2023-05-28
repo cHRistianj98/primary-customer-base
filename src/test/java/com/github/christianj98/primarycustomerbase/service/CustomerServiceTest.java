@@ -60,7 +60,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    @DisplayName("check if exception will be thrown when customer exist")
+    @DisplayName("try to save Customer")
     public void save_validCustomerDto_ReturnsCreatedCustomer() {
         // given
         when(customerRepository.existsByFirstNameAndLastName(any(), any())).thenReturn(false);
