@@ -9,3 +9,23 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: customer-base
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  spring-app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8081:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+
+volumes:
+  pg_data:
+  jenkins_data:
