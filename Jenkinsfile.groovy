@@ -9,9 +9,11 @@ pipeline {
         }
 
         stage('Install maven') {
-            sh 'curl -s "https://get.sdkman.io" | bash'
-            sh 'source "$HOME/.sdkman/bin/sdkman-init.sh"'
-            sh 'sdk install maven'
+            steps {
+                sh 'curl -s "https://get.sdkman.io" | bash'
+                sh 'source "$HOME/.sdkman/bin/sdkman-init.sh"'
+                sh 'sdk install maven'
+            }
         }
 
         stage('Build') {
