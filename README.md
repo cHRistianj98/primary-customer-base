@@ -21,6 +21,10 @@ The following requirements should be fulfilled in the project:
 - Use PostgreSQL as the database, running in Docker.
 - Configure Jenkins in Docker.
 
+## Endpoints in Swagger
+
+http://localhost:8080/swagger-ui/#/
+
 ## Technologies and Tools
 
 The project will utilize the following technologies and tools:

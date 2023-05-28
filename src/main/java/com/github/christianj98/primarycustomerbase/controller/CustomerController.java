@@ -5,6 +5,8 @@ import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.service.CustomerService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +23,13 @@ import java.net.URI;
 @RestController
 @RequestMapping(path = "customers")
 @RequiredArgsConstructor
+@Api(tags = "Customer Controller")
 public class CustomerController {
     private final CustomerService customerService;
     private final CustomerMapperService customerMapperService;
 
     @PostMapping
+    @ApiOperation("Create customer")
     public ResponseEntity<CustomerDto> createCustomer(@RequestBody @Valid CustomerDto customerDto) {
         Customer createdCustomer = customerService.save(customerDto);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
