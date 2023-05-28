@@ -8,6 +8,8 @@ import com.github.christianj98.primarycustomerbase.repository.CustomerRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
@@ -15,11 +17,11 @@ public class CustomerService {
     private final CustomerMapperService customerMapperService;
 
     public Customer save(CustomerDto customerDto) {
-        if (customerRepository.existsByFirstNameAndLastName(customerDto.getFirstName(),
-                customerDto.getLastName())) {
-            final String errorMessage = "Customer with given first name %s and last name %s already exist";
+        if (customerRepository.existsByFirstNameAndLastName(customerDto.getFirstName(), customerDto.getLastName())) {
             throw new ResourceAlreadyExistsException(
-                    String.format(errorMessage, customerDto.getFirstName(), customerDto.getLastName()));
+                    String.format(CUSTOMER_ALREADY_EXIST_ERROR.getMessage(),
+                            customerDto.getFirstName(),
+                            customerDto.getLastName()));
         }
 
         return customerRepository.save(customerMapperService.mapFrom(customerDto));
