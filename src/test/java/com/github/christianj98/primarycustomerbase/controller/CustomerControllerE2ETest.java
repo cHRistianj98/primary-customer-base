@@ -24,8 +24,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureMockMvc
 @ActiveProfiles("e2e")
 public class CustomerControllerE2ETest {
-    private static final String URI = "/customers";
-
     @LocalServerPort
     private int port;
 
@@ -42,10 +40,10 @@ public class CustomerControllerE2ETest {
     @Test
     public void createCustomer_ResourceAlreadyExists_ExceptionThrown() {
         // given
-        restTemplate.postForEntity(URI, customerDto, Void.class);
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
 
         // when
-        ResponseEntity<CustomerDto> response = restTemplate.postForEntity(URI, customerDto, CustomerDto.class);
+        ResponseEntity<CustomerDto> response = restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
@@ -59,7 +57,7 @@ public class CustomerControllerE2ETest {
 
         // when
         final ResponseEntity<CustomerDto> response = restTemplate.postForEntity(
-                createURL(URI),
+                createURL(CUSTOMERS_URI),
                 customerDto,
                 CustomerDto.class);
 

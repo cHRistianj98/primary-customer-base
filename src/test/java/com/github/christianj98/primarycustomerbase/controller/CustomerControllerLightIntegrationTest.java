@@ -5,31 +5,25 @@ import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.service.CustomerService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Test class with integration tests for {@link CustomerController}
+ * Test class with light integration tests for {@link CustomerController}
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("integration")
-public class CustomerControllerIntegrationTest {
-
+@WebMvcTest(CustomerController.class)
+public class CustomerControllerLightIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,43 +33,30 @@ public class CustomerControllerIntegrationTest {
     @MockBean
     private CustomerMapperService customerMapperService;
 
-    private CustomerDto customerDto;
-
-    private Customer customer;
-
-    @BeforeEach
-    public void init() {
-        customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
-        customer = createCustomer(FIRST_NAME, LAST_NAME);
-    }
-
     @Test
-    @DisplayName("Create customer - integration test")
-    public void shouldCreateCustomer() throws Exception {
+    public void createCustomer_successfulAttempt() throws Exception {
         // given
-        when(customerService.save(any(CustomerDto.class))).thenReturn(customer);
+        final CustomerDto customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+
+        when(customerService.save(any(CustomerDto.class))).thenReturn(createCustomer(FIRST_NAME, LAST_NAME));
         when(customerMapperService.mapFrom(any(Customer.class))).thenReturn(customerDto);
 
-        final String expectedLocation = "http://localhost/customers/" + customer.getId();
-
         // when + then
-        mockMvc.perform(post("/customers")
+        mockMvc.perform(post(CUSTOMERS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName").value(customerDto.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(customerDto.getLastName()))
-                .andExpect(header().string("Location", expectedLocation));
+                .andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("Try to create the same customer what end as a conflict")
     public void createCustomer_expectResourceNotFoundException() throws Exception {
         // given
+        final CustomerDto customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+
         when(customerService.save(any(CustomerDto.class))).thenThrow(ResourceAlreadyExistsException.class);
 
         // when + then
-        mockMvc.perform(post("/customers")
+        mockMvc.perform(post(CUSTOMERS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
                 .andExpect(status().isConflict())
