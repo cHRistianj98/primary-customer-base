@@ -8,7 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomerMapperServiceTest {
@@ -20,9 +24,7 @@ public class CustomerMapperServiceTest {
     @DisplayName("Map customer entity from customer dto")
     public void shouldMapFromCustomerDto() {
         // given
-        final CustomerDto customerDto = new CustomerDto();
-        customerDto.setFirstName("Jan");
-        customerDto.setLastName("Kowalski");
+        final CustomerDto customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
 
         // when
         final Customer customer = customerMapperService.mapFrom(customerDto);
@@ -36,16 +38,34 @@ public class CustomerMapperServiceTest {
     @DisplayName("Map customer dto from customer entity")
     public void shouldMapFromCustomerEntity() {
         // given
-        final Customer customer = new Customer();
-        customer.setFirstName("Jan");
-        customer.setLastName("Kowalski");
+        final Customer customer = createCustomer(FIRST_NAME, LAST_NAME);
 
         // when
-        final CustomerDto customerdto = customerMapperService.mapFrom(customer);
+        final CustomerDto customerDto = customerMapperService.mapFrom(customer);
 
         // then
-        assertThat(customerdto.getFirstName()).isEqualTo(customer.getFirstName());
-        assertThat(customerdto.getLastName()).isEqualTo(customer.getLastName());
+        assertThat(customerDto.getFirstName()).isEqualTo(customer.getFirstName());
+        assertThat(customerDto.getLastName()).isEqualTo(customer.getLastName());
+    }
+
+    @Test
+    @DisplayName("Map list of customer dtos from list of customer entities")
+    public void shouldMapFromCustomerEntities() {
+        // given
+        final List<Customer> customers = List.of(createCustomer(FIRST_NAME, LAST_NAME),
+                createCustomer("Andrzej", "Nowak"));
+
+        // when
+        final List<CustomerDto> customerDtos = customerMapperService.mapFrom(customers);
+
+        // then
+        assertThat(customerDtos).extracting(CustomerDto::getFirstName).hasSameElementsAs(
+                customers.stream()
+                        .map(Customer::getFirstName)
+                        .collect(Collectors.toList()));
+        assertThat(customerDtos).extracting(CustomerDto::getLastName).hasSameElementsAs(customers.stream()
+                .map(Customer::getLastName)
+                .collect(Collectors.toList()));
     }
 
 }
