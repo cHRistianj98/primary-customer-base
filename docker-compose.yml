@@ -12,6 +12,30 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+  test-db:
+    image: postgres
+    container_name: e2e-test-db
+    ports:
+      - "5442:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: customer-base
+    volumes:
+      - pg_data-e2e:/var/lib/postgresql/data
+
+  integration-db:
+    image: postgres
+    container_name: integration-test-db
+    ports:
+      - "5452:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: customer-base
+    volumes:
+      - pg_data-integration:/var/lib/postgresql/data
+
   spring-app:
     build: .
     ports:
@@ -28,4 +52,6 @@ services:
 
 volumes:
   pg_data:
+  pg_data-integration:
+  pg_data-e2e:
   jenkins_data:
