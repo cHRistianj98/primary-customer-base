@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
+import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.service.CustomerService;
-import com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,6 +68,20 @@ public class CustomerControllerIntegrationTest {
                 .andExpect(jsonPath("$.firstName").value(customerDto.getFirstName()))
                 .andExpect(jsonPath("$.lastName").value(customerDto.getLastName()))
                 .andExpect(header().string("Location", expectedLocation));
+    }
+
+    @Test
+    @DisplayName("Try to create the same customer what end as a conflict")
+    public void createCustomer_expectResourceNotFoundException() throws Exception {
+        // given
+        when(customerService.save(any(CustomerDto.class))).thenThrow(ResourceAlreadyExistsException.class);
+
+        // when + then
+        mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(customerDto)))
+                .andExpect(status().isConflict())
+                .andExpect(header().doesNotExist("Location"));
     }
 
     private String asJsonString(Object object) {

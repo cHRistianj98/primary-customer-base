@@ -17,6 +17,9 @@ import java.net.URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+/**
+ * Test class with E2E tests for {@link CustomerController}
+ */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("e2e")
@@ -42,10 +45,11 @@ public class CustomerControllerE2ETest {
         restTemplate.postForEntity(URI, customerDto, Void.class);
 
         // when
-        ResponseEntity<Void> response = restTemplate.postForEntity(URI, customerDto, Void.class);
+        ResponseEntity<CustomerDto> response = restTemplate.postForEntity(URI, customerDto, CustomerDto.class);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNull();
     }
 
     @Test
@@ -54,10 +58,17 @@ public class CustomerControllerE2ETest {
         final CustomerDto customerDto = createCustomerDto("Andrzej", "Nowak");
 
         // when
-        final ResponseEntity<Void> response = restTemplate.postForEntity(createURL(URI), customerDto, Void.class);
+        final ResponseEntity<CustomerDto> response = restTemplate.postForEntity(
+                createURL(URI),
+                customerDto,
+                CustomerDto.class);
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        final CustomerDto createdCustomerDto = response.getBody();
+        assert createdCustomerDto != null;
+        assertThat(createdCustomerDto.getFirstName()).isEqualTo(customerDto.getFirstName());
+        assertThat(createdCustomerDto.getLastName()).isEqualTo(customerDto.getLastName());
         final URI location = response.getHeaders().getLocation();
         assert location != null;
         assertThat(location.getPort()).isEqualTo(port);
