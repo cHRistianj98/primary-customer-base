@@ -6,6 +6,7 @@ import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.service.CustomerService;
+import com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,8 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("integration")
 public class CustomerControllerIntegrationTest {
-    private static final String FIRST_NAME = "Jan";
-    private static final String LAST_NAME = "Kowalski";
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,8 +47,8 @@ public class CustomerControllerIntegrationTest {
 
     @BeforeEach
     public void init() {
-        customerDto = createCustomerDto();
-        customer = createCustomer();
+        customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+        customer = createCustomer(FIRST_NAME, LAST_NAME);
     }
 
     @Test
@@ -80,18 +80,4 @@ public class CustomerControllerIntegrationTest {
         }
     }
 
-    private Customer createCustomer() {
-        Customer customer = new Customer();
-        customer.setId(1);
-        customer.setFirstName(FIRST_NAME);
-        customer.setLastName(LAST_NAME);
-        return customer;
-    }
-
-    private CustomerDto createCustomerDto() {
-        CustomerDto customerDto = new CustomerDto();
-        customerDto.setFirstName(FIRST_NAME);
-        customerDto.setLastName(LAST_NAME);
-        return customerDto;
-    }
 }
