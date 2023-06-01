@@ -8,6 +8,8 @@ import com.github.christianj98.primarycustomerbase.repository.CustomerRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
 
 @Service
@@ -25,5 +27,9 @@ public class CustomerService {
         }
 
         return customerRepository.save(customerMapperService.mapFrom(customerDto));
+    }
+
+    public List<Customer> findAll() {
+        return customerRepository.findAll();
     }
 }

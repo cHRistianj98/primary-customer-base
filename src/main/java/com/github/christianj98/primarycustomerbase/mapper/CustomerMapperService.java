@@ -4,6 +4,10 @@ import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class CustomerMapperService {
     public Customer mapFrom(CustomerDto customerDto) {
@@ -11,6 +15,12 @@ public class CustomerMapperService {
         customer.setFirstName(customerDto.getFirstName());
         customer.setLastName(customerDto.getLastName());
         return customer;
+    }
+
+    public List<CustomerDto> mapFrom(@NotNull List<Customer> customers) {
+        return customers.stream()
+                .map(this::mapFrom)
+                .collect(Collectors.toList());
     }
 
     public CustomerDto mapFrom(Customer customer) {

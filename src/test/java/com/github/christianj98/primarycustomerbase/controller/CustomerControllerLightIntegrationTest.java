@@ -16,6 +16,7 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +46,7 @@ public class CustomerControllerLightIntegrationTest {
         mockMvc.perform(post(CUSTOMERS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
+                .andDo(print())
                 .andExpect(status().isCreated());
     }
 
