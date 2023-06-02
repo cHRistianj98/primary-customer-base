@@ -13,23 +13,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Test class for {@link CustomerService}
+ * Test class for {@link CustomerServiceImpl}
  */
 @ExtendWith(MockitoExtension.class)
-public class CustomerServiceTest {
+public class CustomerServiceImplTest {
     private static final String FIRST_NAME = "Jan";
     private static final String LAST_NAME = "Kowalski";
 
     @InjectMocks
-    private CustomerService customerService;
+    private CustomerServiceImpl customerService;
     @Mock
     private CustomerRepository customerRepository;
     @Mock
@@ -76,6 +79,19 @@ public class CustomerServiceTest {
         verify(customerRepository).existsByFirstNameAndLastName(FIRST_NAME, LAST_NAME);
         verify(customerMapperService).mapFrom(customerDto);
         verify(customerRepository).save(customer);
+    }
+
+    @Test
+    public void findAll_UseRepository() {
+        // given
+        when(customerRepository.findAll()).thenReturn(Collections.singletonList(customer));
+
+        // when
+        final List<Customer> customers = customerService.findAll();
+
+        // then
+        assertThat(customers).containsOnly(customer);
+        verify(customerRepository).findAll();
     }
 
     private CustomerDto createCustomerDto() {
