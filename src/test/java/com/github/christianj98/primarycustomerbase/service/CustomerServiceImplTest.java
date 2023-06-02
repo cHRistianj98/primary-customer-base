@@ -82,6 +82,7 @@ public class CustomerServiceImplTest {
     }
 
     @Test
+    @DisplayName("Find all customers from the table")
     public void findAll_UseRepository() {
         // given
         when(customerRepository.findAll()).thenReturn(Collections.singletonList(customer));
