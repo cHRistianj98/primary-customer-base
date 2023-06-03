@@ -13,11 +13,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.asJsonString;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,7 +56,7 @@ public class CustomerControllerIntegrationTest {
         final String expectedLocation = "http://localhost/customers/" + customer.getId();
 
         // when + then
-        mockMvc.perform(post("/customers")
+        mockMvc.perform(post(CUSTOMERS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
                 .andExpect(status().isCreated())
@@ -70,10 +72,25 @@ public class CustomerControllerIntegrationTest {
         customer = customerRepository.save(customer);
 
         // when + then
-        mockMvc.perform(post("/customers")
+        mockMvc.perform(post(CUSTOMERS_URI)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
                 .andExpect(status().isConflict())
                 .andExpect(header().doesNotExist("Location"));
+    }
+
+    @Test
+    @DisplayName("Find all customers in DB")
+    public void findAll_expectAllCustomersFromDb() throws Exception {
+        // given
+        customer = customerRepository.save(customer);
+
+        // when + then
+        mockMvc.perform(get(CUSTOMERS_URI)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
     }
 }

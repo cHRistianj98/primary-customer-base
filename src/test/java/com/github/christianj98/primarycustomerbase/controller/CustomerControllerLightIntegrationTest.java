@@ -12,6 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
@@ -19,10 +21,13 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -68,5 +73,25 @@ public class CustomerControllerLightIntegrationTest {
                         .content(asJsonString(customerDto)))
                 .andExpect(status().isConflict())
                 .andExpect(header().doesNotExist("Location"));
+    }
+
+    @Test
+    public void findAllCustomer_expectAllCustomersFromDb() throws Exception {
+        // given
+        final Customer customer = createCustomer(FIRST_NAME, LAST_NAME);
+        final CustomerDto customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+
+        when(customerService.findAll()).thenReturn(List.of(customer));
+        when(customerMapperService.mapFrom(anyList())).thenReturn(List.of(customerDto));
+
+        // when
+        mockMvc.perform(get(CUSTOMERS_URI)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
     }
 }

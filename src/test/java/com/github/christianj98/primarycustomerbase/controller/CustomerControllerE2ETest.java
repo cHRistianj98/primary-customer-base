@@ -8,18 +8,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.net.URI;
+import java.util.List;
 
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class with E2E tests for {@link CustomerController}
@@ -75,6 +78,27 @@ public class CustomerControllerE2ETest {
         assert location != null;
         assertThat(location.getPort()).isEqualTo(port);
         assertThat(location.getHost()).isEqualTo(HOST);
+    }
+
+    @Test
+    public void findCustomers_findAllCustomersInDb() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+
+        // when
+        var response = restTemplate.exchange(
+                CUSTOMERS_URI,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<CustomerDto>>() {
+                });
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        List<CustomerDto> customers = response.getBody();
+        assertThat(customers).hasSize(1);
+        assertThat(customers).extracting(CustomerDto::getFirstName).containsOnly(FIRST_NAME);
+        assertThat(customers).extracting(CustomerDto::getLastName).containsOnly(LAST_NAME);
     }
 
     private String createURL(final String uri) {
