@@ -2,23 +2,18 @@ package com.github.christianj98.primarycustomerbase.controller;
 
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
-import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
-import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
-import com.github.christianj98.primarycustomerbase.service.CustomerService;
+import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,11 +28,8 @@ public class CustomerControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private CustomerService customerService;
-
-    @MockBean
-    private CustomerMapperService customerMapperService;
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private CustomerDto customerDto;
 
@@ -53,9 +45,6 @@ public class CustomerControllerIntegrationTest {
     @DisplayName("Create customer - integration test")
     public void shouldCreateCustomer() throws Exception {
         // given
-        when(customerService.save(any(CustomerDto.class))).thenReturn(customer);
-        when(customerMapperService.mapFrom(any(Customer.class))).thenReturn(customerDto);
-
         final String expectedLocation = "http://localhost/customers/" + customer.getId();
 
         // when + then
@@ -72,7 +61,7 @@ public class CustomerControllerIntegrationTest {
     @DisplayName("Try to create the same customer what end as a conflict")
     public void createCustomer_expectResourceNotFoundException() throws Exception {
         // given
-        when(customerService.save(any(CustomerDto.class))).thenThrow(ResourceAlreadyExistsException.class);
+        customer = customerRepository.save(customer);
 
         // when + then
         mockMvc.perform(post("/customers")
