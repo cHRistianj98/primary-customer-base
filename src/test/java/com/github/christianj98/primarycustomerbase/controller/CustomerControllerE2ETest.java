@@ -14,7 +14,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.net.URI;
 
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.HOST;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**

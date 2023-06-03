@@ -9,7 +9,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest

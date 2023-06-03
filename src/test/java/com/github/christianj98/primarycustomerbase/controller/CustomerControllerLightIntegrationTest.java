@@ -12,7 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.asJsonString;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

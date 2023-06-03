@@ -13,9 +13,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.*;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.asJsonString;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test class with integration tests for {@link CustomerController}
