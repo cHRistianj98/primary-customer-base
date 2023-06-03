@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CustomerRepositoryTest {
     @Autowired
     private CustomerRepository customerRepository;
-
     private Customer customer;
 
     @BeforeEach
