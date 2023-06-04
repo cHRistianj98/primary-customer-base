@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,6 +64,13 @@ public class CustomerController {
     public ResponseEntity<CustomerDto> updateCustomer(@RequestBody @Valid CustomerDto customerDto,
                                                       @PathVariable int id) {
         return ResponseEntity.ok(customerService.update(customerDto, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @ApiOperation("Delete customer wit given id")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable int id) {
+        customerService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)

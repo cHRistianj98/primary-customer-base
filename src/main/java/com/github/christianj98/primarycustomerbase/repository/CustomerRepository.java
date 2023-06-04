@@ -18,4 +18,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     @Override
     boolean existsById(Integer id);
     boolean existsByFirstNameAndLastName(String firstName, String lastName);
+
+    void deleteById(Integer id);
 }

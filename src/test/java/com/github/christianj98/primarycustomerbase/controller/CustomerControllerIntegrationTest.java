@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,6 +21,8 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("integration")
 public class CustomerControllerIntegrationTest {
 
@@ -133,12 +137,11 @@ public class CustomerControllerIntegrationTest {
     @DisplayName("Update one customer by id")
     public void update_customerUpdated() throws Exception {
         // given
-        int id = 1;
         customer = customerRepository.save(customer);
         final CustomerDto customerDtoToUpdate = createCustomerDto("Andrzej", "Nowak");
 
         // when + then
-        mockMvc.perform(put(CUSTOMERS_URI + "/{id}", id)
+        mockMvc.perform(put(CUSTOMERS_URI + "/{id}", customer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDtoToUpdate)))
                 .andDo(print())
@@ -164,5 +167,35 @@ public class CustomerControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         assertThat(responseBody).contains(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Delete one customer by id but customer not found")
+    public void deleteById_customerNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        final String responseBody = mockMvc.perform(delete(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(responseBody).contains(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Delete one customer by id")
+    public void delete_customerDeleted() throws Exception {
+        // given
+        customer = customerRepository.save(customer);
+
+        // when + then
+        mockMvc.perform(delete(CUSTOMERS_URI + "/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 }

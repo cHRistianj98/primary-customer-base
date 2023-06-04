@@ -13,4 +13,6 @@ public interface CustomerService {
     CustomerDto findById(int id);
 
     CustomerDto update(CustomerDto customerDto, int id);
+
+    void delete(int id);
 }

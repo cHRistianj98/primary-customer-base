@@ -191,6 +191,43 @@ public class CustomerControllerE2ETest {
         assertThat(response.getBody()).contains(Integer.toString(id));
     }
 
+    @Test
+    public void deleteById_customerDeleted() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+        int id = 1;
+
+        // when
+        var deleteResponse = restTemplate.exchange(
+                CUSTOMERS_URI + "/{id}",
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                id);
+
+        // then
+        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+    }
+
+    @Test
+    public void deleteById_customerNotFound(CapturedOutput output) {
+        // given
+        int id = 999;
+
+        // when
+        var deleteResponse = restTemplate.exchange(
+                CUSTOMERS_URI + "/{id}",
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                id);
+
+        // then
+        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(Integer.toString(id));
+    }
+
     private String createURL(final String uri) {
         return String.format("http://%s:%s%s", HOST, port, uri);
     }

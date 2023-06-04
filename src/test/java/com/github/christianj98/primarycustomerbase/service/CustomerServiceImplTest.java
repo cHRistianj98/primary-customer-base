@@ -159,6 +159,34 @@ public class CustomerServiceImplTest {
         // then
         assertThat(updatedCustomerDto.getFirstName()).isEqualTo(customerDto.getFirstName());
         assertThat(updatedCustomerDto.getLastName()).isEqualTo(customerDto.getLastName());
+    }
 
+    @Test
+    @DisplayName("Delete one customer with given id")
+    public void delete_customerDeleted() {
+        // given
+        int id = 1;
+
+        when(customerRepository.existsById(id)).thenReturn(true);
+
+        // when
+        customerService.delete(id);
+
+        // then
+        verify(customerRepository).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Delete one customer with given id but entity not found")
+    public void delete_customerNotFound() {
+        // given
+        int id = 1;
+
+        when(customerRepository.existsById(id)).thenReturn(false);
+
+        // when + then
+        assertThatThrownBy(() -> customerService.delete(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining(Integer.toString(id));
     }
 }

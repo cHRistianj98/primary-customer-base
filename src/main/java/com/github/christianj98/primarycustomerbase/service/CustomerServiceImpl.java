@@ -49,4 +49,11 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setLastName(customerDto.getLastName());
         return customerMapperService.mapFrom(customer);
     }
+
+    public void delete(final int id) {
+        if (!customerRepository.existsById(id)) {
+            throw new EntityNotFoundException(String.format("Customer not found with given id: %s", id));
+        }
+        customerRepository.deleteById(id);
+    }
 }

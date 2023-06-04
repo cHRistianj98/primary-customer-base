@@ -25,7 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -161,6 +163,34 @@ public class CustomerControllerLightIntegrationTest {
         var exception = mockMvc.perform(put(CUSTOMERS_URI + "/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDtoToUpdate)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResolvedException();
+        assertThat(exception).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    public void delete_expectDeletedCustomer() throws Exception {
+        // given
+        int id = 1;
+
+        // when
+        mockMvc.perform(delete(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void delete_expectCustomerNotFound() throws Exception {
+        // given
+        int id = 1;
+        doThrow(EntityNotFoundException.class).when(customerService).delete(anyInt());
+
+        // when + then
+        var exception = mockMvc.perform(delete(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andReturn()

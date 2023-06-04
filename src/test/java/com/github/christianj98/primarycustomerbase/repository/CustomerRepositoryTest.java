@@ -75,4 +75,13 @@ public class CustomerRepositoryTest {
         // then
         assertThat(customerExists).isTrue();
     }
+
+    @Test
+    public void whenDeleteById_returnNothing() {
+        // when
+        customerRepository.deleteById(customer.getId());
+
+        // then
+        assertThat(customerRepository.findById(customer.getId())).isEmpty();
+    }
 }
