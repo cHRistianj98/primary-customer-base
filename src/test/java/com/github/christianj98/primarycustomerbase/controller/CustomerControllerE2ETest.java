@@ -11,8 +11,11 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -136,6 +139,56 @@ public class CustomerControllerE2ETest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).contains(id.toString());
         assertThat(output).contains(id.toString());
+    }
+
+    @Test
+    public void update_customerUpdated() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+        final CustomerDto customerDtoToUpdate = createCustomerDto("Andrzej", "Nowak");
+        int id = 1;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<CustomerDto> requestEntity = new HttpEntity<>(customerDtoToUpdate, headers);
+
+        // when
+        var response = restTemplate.exchange(
+                createURL(CUSTOMERS_URI + "/{id}"),
+                HttpMethod.PUT,
+                requestEntity,
+                CustomerDto.class,
+                id
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        CustomerDto updatedCustomer = response.getBody();
+        assertThat(updatedCustomer).isNotNull();
+        assertThat(updatedCustomer.getFirstName()).isEqualTo(customerDtoToUpdate.getFirstName());
+        assertThat(updatedCustomer.getLastName()).isEqualTo(customerDtoToUpdate.getLastName());
+    }
+
+    @Test
+    public void update_customerNotFound() {
+        // given
+        final CustomerDto customerDtoToUpdate = createCustomerDto("Andrzej", "Nowak");
+        int id = 999;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<CustomerDto> requestEntity = new HttpEntity<>(customerDtoToUpdate, headers);
+
+        // when
+        var response = restTemplate.exchange(
+                createURL(CUSTOMERS_URI + "/{id}"),
+                HttpMethod.PUT,
+                requestEntity,
+                String.class,
+                id
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).contains(Integer.toString(id));
     }
 
     private String createURL(final String uri) {

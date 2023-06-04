@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -130,5 +131,40 @@ public class CustomerControllerLightIntegrationTest {
                 .andReturn()
                 .getResolvedException();
         assertThat(resolvedException).isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    public void update_expectUpdatedCustomer() throws Exception {
+        // given
+        int id = 1;
+        final CustomerDto customerDtoToUpdate = createCustomerDto("Andrzej", "Nowak");
+        when(customerService.update(any(), anyInt())).thenReturn(customerDtoToUpdate);
+
+        // when
+        mockMvc.perform(put(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(customerDtoToUpdate)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(customerDtoToUpdate.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(customerDtoToUpdate.getLastName()));
+    }
+
+    @Test
+    public void update_expectCustomerNotFound() throws Exception {
+        // given
+        int id = 1;
+        final CustomerDto customerDtoToUpdate = createCustomerDto("Andrzej", "Nowak");
+        when(customerService.update(any(), anyInt())).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        var exception = mockMvc.perform(put(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(customerDtoToUpdate)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResolvedException();
+        assertThat(exception).isInstanceOf(EntityNotFoundException.class);
     }
 }
