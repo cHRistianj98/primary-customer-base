@@ -7,6 +7,7 @@ import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -39,5 +40,13 @@ public class CustomerServiceImpl implements CustomerService {
                 .map(customerMapperService::mapFrom)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Customer not found with given id: %s", id)));
+    }
+
+    @Transactional
+    public CustomerDto update(final CustomerDto customerDto, final int id) {
+        Customer customer = customerRepository.getReferenceById(id);
+        customer.setFirstName(customerDto.getFirstName());
+        customer.setLastName(customerDto.getLastName());
+        return customerMapperService.mapFrom(customer);
     }
 }

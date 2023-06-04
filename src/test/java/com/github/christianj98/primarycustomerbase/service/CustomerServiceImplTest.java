@@ -5,7 +5,6 @@ import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
-import com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ public class CustomerServiceImplTest {
         customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
         customer = createCustomer(FIRST_NAME, LAST_NAME);
     }
-    
+
     @Test
     @DisplayName("check if exception will be thrown when customer exist")
     public void save_existingCustomerDto_ThrowsResourceAlreadyExistsException() {
@@ -128,5 +127,38 @@ public class CustomerServiceImplTest {
         assertThatThrownBy(() -> customerService.findById(id))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Update one customer but customer does not exist")
+    public void update_customerNotFound() {
+        // given
+        int id = 2137;
+
+        when(customerRepository.getReferenceById(id)).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        assertThatThrownBy(() -> customerService.update(customerDto, id))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("Update one customer successfully")
+    public void update_customerUpdated() {
+        // given
+        customerDto.setFirstName("Andrzej");
+        customerDto.setLastName("Nowak");
+        int id = 1;
+
+        when(customerRepository.getReferenceById(id)).thenReturn(customer);
+        when(customerMapperService.mapFrom(any(Customer.class))).thenReturn(customerDto);
+
+        // when
+        final CustomerDto updatedCustomerDto = customerService.update(customerDto, id);
+
+        // then
+        assertThat(updatedCustomerDto.getFirstName()).isEqualTo(customerDto.getFirstName());
+        assertThat(updatedCustomerDto.getLastName()).isEqualTo(customerDto.getLastName());
+
     }
 }

@@ -11,4 +11,6 @@ public interface CustomerService {
     List<Customer> findAll();
 
     CustomerDto findById(int id);
+
+    CustomerDto update(CustomerDto customerDto, int id);
 }
