@@ -19,8 +19,10 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.asJsonString;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -92,5 +94,37 @@ public class CustomerControllerIntegrationTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
                 .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
+    }
+
+    @Test
+    @DisplayName("Find one customer by id")
+    public void findById_expectOneCustomerFromDb() throws Exception {
+        // given
+        customer = customerRepository.save(customer);
+
+        // when + then
+        mockMvc.perform(get(CUSTOMERS_URI + "/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(LAST_NAME));
+    }
+
+    @Test
+    @DisplayName("Find one customer by id, but customer with given id was not found")
+    public void findById_resourceNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        final String responseBody = mockMvc.perform(get(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(responseBody).isEqualTo("Customer not found with given id: " + id);
     }
 }
