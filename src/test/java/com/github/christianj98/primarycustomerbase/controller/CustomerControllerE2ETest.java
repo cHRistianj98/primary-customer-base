@@ -4,7 +4,6 @@ import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -12,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.net.URI;
@@ -23,12 +23,13 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
 /**
  * Test class with E2E tests for {@link CustomerController}
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("e2e")
 public class CustomerControllerE2ETest {
     @LocalServerPort
@@ -99,6 +100,36 @@ public class CustomerControllerE2ETest {
         assertThat(customers).hasSize(1);
         assertThat(customers).extracting(CustomerDto::getFirstName).containsOnly(FIRST_NAME);
         assertThat(customers).extracting(CustomerDto::getLastName).containsOnly(LAST_NAME);
+    }
+
+    @Test
+    public void findById_CustomerFound() {
+        // given
+        int id = 1;
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+
+        // when
+        var response = restTemplate.getForEntity(CUSTOMERS_URI + "/{id}", CustomerDto.class, id);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        CustomerDto foundCustomer = response.getBody();
+        assertThat(foundCustomer).isNotNull();
+        assertThat(foundCustomer.getFirstName()).isEqualTo(FIRST_NAME);
+        assertThat(foundCustomer.getLastName()).isEqualTo(LAST_NAME);
+    }
+
+    @Test
+    public void findById_CustomerNotFound() {
+        // given
+        Integer id = 999;
+
+        // when
+        var response = restTemplate.getForEntity(CUSTOMERS_URI + "/{id}", String.class, id);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).contains(id.toString());
     }
 
     private String createURL(final String uri) {

@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface CustomerService {
     Customer save(CustomerDto customerDto);
+
     List<Customer> findAll();
+
+    CustomerDto findById(int id);
 }

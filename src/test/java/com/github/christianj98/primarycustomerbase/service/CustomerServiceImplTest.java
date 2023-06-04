@@ -5,6 +5,7 @@ import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
+import com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,9 +35,6 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 public class CustomerServiceImplTest {
-    private static final String FIRST_NAME = "Jan";
-    private static final String LAST_NAME = "Kowalski";
-
     @InjectMocks
     private CustomerServiceImpl customerService;
     @Mock
@@ -44,8 +48,8 @@ public class CustomerServiceImplTest {
 
     @BeforeEach
     public void init() {
-        customerDto = createCustomerDto();
-        customer = createCustomer();
+        customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+        customer = createCustomer(FIRST_NAME, LAST_NAME);
     }
     
     @Test
@@ -95,17 +99,34 @@ public class CustomerServiceImplTest {
         verify(customerRepository).findAll();
     }
 
-    private CustomerDto createCustomerDto() {
-        CustomerDto customerDto = new CustomerDto();
-        customerDto.setFirstName(FIRST_NAME);
-        customerDto.setLastName(LAST_NAME);
-        return customerDto;
+    @Test
+    @DisplayName("Find one existing customer by id")
+    public void findById_CustomerFound() {
+        // given
+        int id = 1;
+
+        when(customerRepository.findById(id)).thenReturn(Optional.of(customer));
+        when(customerMapperService.mapFrom(any(Customer.class))).thenReturn(customerDto);
+
+        // when
+        final CustomerDto foundCustomerDto = customerService.findById(id);
+
+        // then
+        assertThat(foundCustomerDto.getFirstName()).isEqualTo(FIRST_NAME);
+        assertThat(foundCustomerDto.getLastName()).isEqualTo(LAST_NAME);
     }
 
-    private Customer createCustomer() {
-        Customer customer = new Customer();
-        customer.setFirstName(FIRST_NAME);
-        customer.setLastName(LAST_NAME);
-        return customer;
+    @Test
+    @DisplayName("Find one customer but customer does not exist")
+    public void findById_CustomerNotFound() {
+        // given
+        int id = 2137;
+
+        when(customerRepository.findById(id)).thenReturn(Optional.empty());
+
+        // when + then
+        assertThatThrownBy(() -> customerService.findById(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining(Integer.toString(id));
     }
 }

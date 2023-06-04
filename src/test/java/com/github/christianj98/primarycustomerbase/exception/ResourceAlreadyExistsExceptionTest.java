@@ -9,7 +9,8 @@ public class ResourceAlreadyExistsExceptionTest {
     @Test
     public void shouldCreateCorrectExceptionMessage() {
         final String expectedMessage = "Resource already exists";
-        ResourceAlreadyExistsException exception = assertThrows(ResourceAlreadyExistsException.class,
+        ResourceAlreadyExistsException exception = assertThrows(
+                ResourceAlreadyExistsException.class,
                 () -> {
                     throw new ResourceAlreadyExistsException(expectedMessage);
                 });

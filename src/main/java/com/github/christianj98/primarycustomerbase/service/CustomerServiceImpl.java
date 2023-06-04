@@ -8,6 +8,7 @@ import com.github.christianj98.primarycustomerbase.repository.CustomerRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
@@ -31,5 +32,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     public List<Customer> findAll() {
         return customerRepository.findAll();
+    }
+
+    public CustomerDto findById(final int id) {
+        return customerRepository.findById(id)
+                .map(customerMapperService::mapFrom)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Customer not found with given id: %s", id)));
     }
 }
