@@ -3,8 +3,11 @@ package com.github.christianj98.primarycustomerbase.controller;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,6 +34,7 @@ import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFOR
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @ActiveProfiles("e2e")
+@ExtendWith(OutputCaptureExtension.class)
 public class CustomerControllerE2ETest {
     @LocalServerPort
     private int port;
@@ -46,7 +50,7 @@ public class CustomerControllerE2ETest {
     }
 
     @Test
-    public void createCustomer_ResourceAlreadyExists_ExceptionThrown() {
+    public void createCustomer_ResourceAlreadyExists_ExceptionThrown(CapturedOutput output) {
         // given
         restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
 
@@ -56,6 +60,7 @@ public class CustomerControllerE2ETest {
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNull();
+        assertThat(output).contains(LAST_NAME);
     }
 
     @Test
@@ -120,7 +125,7 @@ public class CustomerControllerE2ETest {
     }
 
     @Test
-    public void findById_CustomerNotFound() {
+    public void findById_CustomerNotFound(CapturedOutput output) {
         // given
         Integer id = 999;
 
@@ -130,6 +135,7 @@ public class CustomerControllerE2ETest {
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).contains(id.toString());
+        assertThat(output).contains(id.toString());
     }
 
     private String createURL(final String uri) {
