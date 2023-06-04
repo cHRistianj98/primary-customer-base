@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
@@ -20,7 +21,9 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.asJsonString;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -93,5 +96,39 @@ public class CustomerControllerLightIntegrationTest {
                 .andExpect(jsonPath("$").isNotEmpty())
                 .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
                 .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
+    }
+
+    @Test
+    public void findById_expectOneCustomer() throws Exception {
+        // given
+        int id = 1;
+        final CustomerDto customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+
+        when(customerService.findById(anyInt())).thenReturn(customerDto);
+
+        // when
+        mockMvc.perform(get(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(LAST_NAME));
+    }
+
+    @Test
+    public void findById_expectEntityNotFoundException() throws Exception {
+        // given
+        int id = 1;
+
+        when(customerService.findById(anyInt())).thenThrow(EntityNotFoundException.class);
+
+        // when
+        final Exception resolvedException = mockMvc.perform(get(CUSTOMERS_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResolvedException();
+        assertThat(resolvedException).isInstanceOf(EntityNotFoundException.class);
     }
 }
