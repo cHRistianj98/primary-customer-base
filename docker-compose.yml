@@ -11,6 +11,8 @@ services:
       POSTGRES_DB: customer-base
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   test-db:
     image: postgres
@@ -23,6 +25,8 @@ services:
       POSTGRES_DB: customer-base
     volumes:
       - pg_data-e2e:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   integration-db:
     image: postgres
@@ -35,6 +39,8 @@ services:
       POSTGRES_DB: customer-base
     volumes:
       - pg_data-integration:/var/lib/postgresql/data
+    networks:
+      - app-network
 
   spring-app:
     build: .
@@ -42,6 +48,8 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    networks:
+      - app-network
 
   jenkins:
     image: jenkins/jenkins:lts
@@ -49,9 +57,14 @@ services:
       - "8081:8080"
     volumes:
       - jenkins_data:/var/jenkins_home
+    networks:
+      - app-network
 
 volumes:
   pg_data:
   pg_data-integration:
   pg_data-e2e:
   jenkins_data:
+
+networks:
+  app-network:
