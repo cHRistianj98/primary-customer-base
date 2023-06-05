@@ -3,6 +3,7 @@ package com.github.christianj98.primarycustomerbase.service;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
+import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +17,11 @@ import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerMapperService customerMapperService;
+    private final AddressMapperService addressMapperService;
 
     public Customer save(CustomerDto customerDto) {
         if (customerRepository.existsByFirstNameAndLastName(customerDto.getFirstName(), customerDto.getLastName())) {
@@ -27,8 +30,9 @@ public class CustomerServiceImpl implements CustomerService {
                             customerDto.getFirstName(),
                             customerDto.getLastName()));
         }
-
-        return customerRepository.save(customerMapperService.mapFrom(customerDto));
+        final Customer customer = customerMapperService.mapFrom(customerDto);
+        customer.setAddress(addressMapperService.mapFrom(customerDto.getAddressDto()));
+        return customerRepository.save(customer);
     }
 
     public List<Customer> findAll() {
@@ -42,7 +46,6 @@ public class CustomerServiceImpl implements CustomerService {
                         String.format("Customer not found with given id: %s", id)));
     }
 
-    @Transactional
     public CustomerDto update(final CustomerDto customerDto, final int id) {
         Customer customer = customerRepository.getReferenceById(id);
         customer.setFirstName(customerDto.getFirstName());
