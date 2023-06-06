@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
+
 public class CustomerTestUtils {
     public static final String FIRST_NAME = "Jan";
     public static final String LAST_NAME = "Kowalski";
@@ -19,6 +23,7 @@ public class CustomerTestUtils {
         CustomerDto customerDto = new CustomerDto();
         customerDto.setFirstName(firstName);
         customerDto.setLastName(lastName);
+        customerDto.setAddressDto(createAddressDto(STREET, CITY));
         return customerDto;
     }
 

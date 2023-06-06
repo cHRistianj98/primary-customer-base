@@ -1,8 +1,11 @@
 package com.github.christianj98.primarycustomerbase.service;
 
+import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
+import com.github.christianj98.primarycustomerbase.entity.Address;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
+import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.mapper.CustomerMapperService;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +22,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
@@ -41,14 +47,20 @@ public class CustomerServiceImplTest {
     @Mock
     private CustomerMapperService customerMapperService;
 
+    @Mock
+    private AddressMapperService addressMapperService;
+
     private CustomerDto customerDto;
 
     private Customer customer;
+
+    private Address address;
 
     @BeforeEach
     public void init() {
         customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
         customer = createCustomer(FIRST_NAME, LAST_NAME);
+        address = createAddress(STREET, CITY);
     }
 
     @Test
@@ -66,11 +78,12 @@ public class CustomerServiceImplTest {
     }
 
     @Test
-    @DisplayName("try to save Customer")
+    @DisplayName("Try to save Customer")
     public void save_validCustomerDto_ReturnsCreatedCustomer() {
         // given
         when(customerRepository.existsByFirstNameAndLastName(any(), any())).thenReturn(false);
         when(customerMapperService.mapFrom(any(CustomerDto.class))).thenReturn(customer);
+        when(addressMapperService.mapFrom(any(AddressDto.class))).thenReturn(address);
         when(customerRepository.save(any())).thenReturn(customer);
 
         // when
@@ -79,6 +92,8 @@ public class CustomerServiceImplTest {
         // then
         assertThat(createdCustomer.getFirstName()).isEqualTo(customerDto.getFirstName());
         assertThat(createdCustomer.getLastName()).isEqualTo(customerDto.getLastName());
+        assertThat(createdCustomer.getAddress().getStreet()).isEqualTo(customerDto.getAddressDto().getStreet());
+        assertThat(createdCustomer.getAddress().getCity()).isEqualTo(customerDto.getAddressDto().getCity());
         verify(customerRepository).existsByFirstNameAndLastName(FIRST_NAME, LAST_NAME);
         verify(customerMapperService).mapFrom(customerDto);
         verify(customerRepository).save(customer);
@@ -159,6 +174,8 @@ public class CustomerServiceImplTest {
         // then
         assertThat(updatedCustomerDto.getFirstName()).isEqualTo(customerDto.getFirstName());
         assertThat(updatedCustomerDto.getLastName()).isEqualTo(customerDto.getLastName());
+        assertThat(updatedCustomerDto.getAddressDto().getStreet()).isEqualTo(customerDto.getAddressDto().getStreet());
+        assertThat(updatedCustomerDto.getAddressDto().getCity()).isEqualTo(customerDto.getAddressDto().getCity());
     }
 
     @Test
