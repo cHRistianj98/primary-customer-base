@@ -1,6 +1,7 @@
 package com.github.christianj98.primarycustomerbase.service;
 
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
+import com.github.christianj98.primarycustomerbase.entity.Address;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
@@ -12,8 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +53,16 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerRepository.getReferenceById(id);
         customer.setFirstName(customerDto.getFirstName());
         customer.setLastName(customerDto.getLastName());
+        ofNullable(customer.getAddress())
+                .map(relatedAddress -> mapAddress(customerDto, relatedAddress))
+                .orElseGet(() -> addressMapperService.mapFrom(customerDto.getAddressDto()));
         return customerMapperService.mapFrom(customer);
+    }
+
+    private Address mapAddress(final CustomerDto customerDto, final Address relatedAddress) {
+        relatedAddress.setStreet(customerDto.getAddressDto().getStreet());
+        relatedAddress.setCity(customerDto.getAddressDto().getCity());
+        return relatedAddress;
     }
 
     public void delete(final int id) {
