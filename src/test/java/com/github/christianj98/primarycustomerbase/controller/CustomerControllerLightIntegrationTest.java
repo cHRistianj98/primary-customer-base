@@ -63,7 +63,11 @@ public class CustomerControllerLightIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(customerDto)))
                 .andDo(print())
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.firstName").value(customerDto.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(customerDto.getLastName()))
+                .andExpect(jsonPath("$.addressDto.street").value(customerDto.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$.addressDto.city").value(customerDto.getAddressDto().getCity()));
     }
 
     @Test
@@ -98,7 +102,9 @@ public class CustomerControllerLightIntegrationTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isNotEmpty())
                 .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
-                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
+                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME))
+                .andExpect(jsonPath("$[0].addressDto.street").value(customerDto.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$[0].addressDto.city").value(customerDto.getAddressDto().getCity()));
     }
 
     @Test
@@ -115,7 +121,9 @@ public class CustomerControllerLightIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value(FIRST_NAME))
-                .andExpect(jsonPath("$.lastName").value(LAST_NAME));
+                .andExpect(jsonPath("$.lastName").value(LAST_NAME))
+                .andExpect(jsonPath("$.addressDto.street").value(customerDto.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$.addressDto.city").value(customerDto.getAddressDto().getCity()));
     }
 
     @Test
@@ -149,7 +157,9 @@ public class CustomerControllerLightIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value(customerDtoToUpdate.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(customerDtoToUpdate.getLastName()));
+                .andExpect(jsonPath("$.lastName").value(customerDtoToUpdate.getLastName()))
+                .andExpect(jsonPath("$.addressDto.street").value(customerDtoToUpdate.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$.addressDto.city").value(customerDtoToUpdate.getAddressDto().getCity()));
     }
 
     @Test

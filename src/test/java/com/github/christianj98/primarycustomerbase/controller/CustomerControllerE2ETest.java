@@ -1,5 +1,6 @@
 package com.github.christianj98.primarycustomerbase.controller;
 
+import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import java.net.URI;
 import java.util.List;
 
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.HOST;
@@ -83,6 +86,8 @@ public class CustomerControllerE2ETest {
         assert createdCustomerDto != null;
         assertThat(createdCustomerDto.getFirstName()).isEqualTo(customerDto.getFirstName());
         assertThat(createdCustomerDto.getLastName()).isEqualTo(customerDto.getLastName());
+        assertThat(createdCustomerDto.getAddressDto().getStreet()).isEqualTo(customerDto.getAddressDto().getStreet());
+        assertThat(createdCustomerDto.getAddressDto().getCity()).isEqualTo(customerDto.getAddressDto().getCity());
         final URI location = response.getHeaders().getLocation();
         assert location != null;
         assertThat(location.getPort()).isEqualTo(port);
@@ -108,6 +113,10 @@ public class CustomerControllerE2ETest {
         assertThat(customers).hasSize(1);
         assertThat(customers).extracting(CustomerDto::getFirstName).containsOnly(FIRST_NAME);
         assertThat(customers).extracting(CustomerDto::getLastName).containsOnly(LAST_NAME);
+        assertThat(customers).extracting(CustomerDto::getAddressDto).extracting(AddressDto::getStreet)
+                .containsOnly(STREET);
+        assertThat(customers).extracting(CustomerDto::getAddressDto).extracting(AddressDto::getCity)
+                .containsOnly(CITY);
     }
 
     @Test
@@ -125,6 +134,9 @@ public class CustomerControllerE2ETest {
         assertThat(foundCustomer).isNotNull();
         assertThat(foundCustomer.getFirstName()).isEqualTo(FIRST_NAME);
         assertThat(foundCustomer.getLastName()).isEqualTo(LAST_NAME);
+        assertThat(foundCustomer.getAddressDto().getStreet()).isEqualTo(STREET);
+        assertThat(foundCustomer.getAddressDto().getCity()).isEqualTo(CITY);
+
     }
 
     @Test
@@ -166,6 +178,8 @@ public class CustomerControllerE2ETest {
         assertThat(updatedCustomer).isNotNull();
         assertThat(updatedCustomer.getFirstName()).isEqualTo(customerDtoToUpdate.getFirstName());
         assertThat(updatedCustomer.getLastName()).isEqualTo(customerDtoToUpdate.getLastName());
+        assertThat(updatedCustomer.getAddressDto().getStreet()).isEqualTo(customerDtoToUpdate.getAddressDto().getStreet());
+        assertThat(updatedCustomer.getAddressDto().getCity()).isEqualTo(customerDtoToUpdate.getAddressDto().getCity());
     }
 
     @Test

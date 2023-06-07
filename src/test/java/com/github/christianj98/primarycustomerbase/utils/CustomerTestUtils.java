@@ -7,6 +7,7 @@ import com.github.christianj98.primarycustomerbase.entity.Customer;
 
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
 
 public class CustomerTestUtils {
@@ -32,6 +33,7 @@ public class CustomerTestUtils {
         customer.setId(1);
         customer.setFirstName(firstName);
         customer.setLastName(lastName);
+        customer.setAddress(createAddress(STREET, CITY));
         return customer;
     }
 

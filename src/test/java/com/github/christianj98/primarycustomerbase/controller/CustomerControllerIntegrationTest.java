@@ -69,6 +69,8 @@ public class CustomerControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstName").value(customerDto.getFirstName()))
                 .andExpect(jsonPath("$.lastName").value(customerDto.getLastName()))
+                .andExpect(jsonPath("$.addressDto.street").value(customerDto.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$.addressDto.city").value(customerDto.getAddressDto().getCity()))
                 .andExpect(header().string("Location", expectedLocation));
     }
 
@@ -98,7 +100,9 @@ public class CustomerControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].firstName").value(FIRST_NAME))
-                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME));
+                .andExpect(jsonPath("$[0].lastName").value(LAST_NAME))
+                .andExpect(jsonPath("$[0].addressDto.street").value(customerDto.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$[0].addressDto.city").value(customer.getAddress().getCity()));
     }
 
     @Test
@@ -147,7 +151,9 @@ public class CustomerControllerIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value(customerDtoToUpdate.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(customerDtoToUpdate.getLastName()));
+                .andExpect(jsonPath("$.lastName").value(customerDtoToUpdate.getLastName()))
+                .andExpect(jsonPath("$.addressDto.street").value(customerDtoToUpdate.getAddressDto().getStreet()))
+                .andExpect(jsonPath("$.addressDto.city").value(customerDtoToUpdate.getAddressDto().getCity()));
     }
 
     @Test
