@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
@@ -49,5 +51,20 @@ public class AddressMapperServiceTest {
         // then
         assertThat(addressDto.getStreet()).isEqualTo(address.getStreet());
         assertThat(addressDto.getCity()).isEqualTo(address.getCity());
+    }
+
+    @Test
+    @DisplayName("Map address dtos from address entities")
+    public void shouldMapFromAddressList() {
+        // given
+        final Address address = createAddress(STREET, CITY);
+        final List<Address> addresses = List.of(address);
+
+        // when
+        final List<AddressDto> addressDtos = addressMapperService.mapFrom(addresses);
+
+        // then
+        assertThat(addressDtos).extracting(AddressDto::getStreet).containsOnly(address.getStreet());
+        assertThat(addressDtos).extracting(AddressDto::getCity).containsOnly(address.getCity());
     }
 }
