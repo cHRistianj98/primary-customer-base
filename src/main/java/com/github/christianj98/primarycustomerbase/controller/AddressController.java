@@ -7,10 +7,16 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
+
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @RestController
 @RequestMapping("addresses")
@@ -21,7 +27,18 @@ public class AddressController {
 
     @GetMapping
     @ApiOperation("Find all addresses")
-    public ResponseEntity<List<AddressDto>> findAllCustomers() {
+    public ResponseEntity<List<AddressDto>> findAllAddresses() {
         return ResponseEntity.ok(addressService.findAll());
+    }
+
+    @PostMapping
+    @ApiOperation("Create address")
+    public ResponseEntity<AddressDto> createAddress(@RequestBody @Valid AddressDto addressDto) {
+        final AddressDto createdAddress = addressService.createAddress(addressDto);
+        final URI location = fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdAddress.getId())
+                .toUri();
+        return ResponseEntity.created(location).body(createdAddress);
     }
 }

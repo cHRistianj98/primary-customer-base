@@ -1,7 +1,5 @@
 package com.github.christianj98.primarycustomerbase.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 
@@ -37,13 +35,4 @@ public class CustomerTestUtils {
         return customer;
     }
 
-    public static String asJsonString(Object object) {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

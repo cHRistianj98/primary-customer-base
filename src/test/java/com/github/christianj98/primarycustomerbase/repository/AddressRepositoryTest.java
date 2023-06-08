@@ -1,7 +1,6 @@
 package com.github.christianj98.primarycustomerbase.repository;
 
 import com.github.christianj98.primarycustomerbase.entity.Address;
-import com.github.christianj98.primarycustomerbase.entity.Customer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +11,15 @@ import java.util.List;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Test class for {@link AddressRepository}
+ */
 @DataJpaTest
 public class AddressRepositoryTest {
+    private static final String CLARK_STREET = "Clark";
+    private static final String NY_CITY = "NY City";
 
     @Autowired
     private AddressRepository addressRepository;
@@ -38,5 +40,34 @@ public class AddressRepositoryTest {
         assertThat(addresses).hasSize(1);
         assertThat(addresses).extracting(Address::getStreet).containsOnly(address.getStreet());
         assertThat(addresses).extracting(Address::getCity).containsOnly(address.getCity());
+    }
+
+    @Test
+    public void whenExistsByStreetAndCity_ThenReturnTrueIfAddressExist() {
+        // when
+        final boolean addressExist = addressRepository.existsByStreetAndCity(STREET, CITY);
+
+        // then
+        assertThat(addressExist).isTrue();
+    }
+
+    @Test
+    public void whenExistsByStreetAndCity_ThenFalseTrueIfAddressNotExist() {
+        // when
+        final boolean addressExist = addressRepository.existsByStreetAndCity(CLARK_STREET, CITY);
+
+        // then
+        assertThat(addressExist).isFalse();
+    }
+    
+    @Test
+    public void whenSave_thenAddressIsCreated() {
+        // when
+        final Address createdAddress = addressRepository.save(createAddress(CLARK_STREET, NY_CITY));
+
+        // then
+        assertThat(createdAddress).isNotNull();
+        assertThat(createdAddress.getStreet()).isEqualTo(CLARK_STREET);
+        assertThat(createdAddress.getCity()).isEqualTo(NY_CITY);
     }
 }

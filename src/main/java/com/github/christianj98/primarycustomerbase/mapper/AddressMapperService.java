@@ -9,15 +9,16 @@ import java.util.stream.Collectors;
 
 @Service
 public class AddressMapperService {
-    public Address mapFrom(AddressDto customerDto) {
+    public Address mapFrom(AddressDto addressDto) {
         Address address = new Address();
-        address.setStreet(customerDto.getStreet());
-        address.setCity(customerDto.getCity());
+        address.setStreet(addressDto.getStreet());
+        address.setCity(addressDto.getCity());
         return address;
     }
 
     public AddressDto mapFrom(Address address) {
         AddressDto addressDto = new AddressDto();
+        addressDto.setId(address.getId());
         addressDto.setStreet(address.getStreet());
         addressDto.setCity(address.getCity());
         return addressDto;

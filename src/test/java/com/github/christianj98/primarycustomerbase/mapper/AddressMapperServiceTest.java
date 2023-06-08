@@ -49,6 +49,7 @@ public class AddressMapperServiceTest {
         final AddressDto addressDto = addressMapperService.mapFrom(address);
 
         // then
+        assertThat(addressDto.getId()).isEqualTo(address.getId());
         assertThat(addressDto.getStreet()).isEqualTo(address.getStreet());
         assertThat(addressDto.getCity()).isEqualTo(address.getCity());
     }
@@ -64,6 +65,7 @@ public class AddressMapperServiceTest {
         final List<AddressDto> addressDtos = addressMapperService.mapFrom(addresses);
 
         // then
+        assertThat(addressDtos).extracting(AddressDto::getId).containsOnly(address.getId());
         assertThat(addressDtos).extracting(AddressDto::getStreet).containsOnly(address.getStreet());
         assertThat(addressDtos).extracting(AddressDto::getCity).containsOnly(address.getCity());
     }

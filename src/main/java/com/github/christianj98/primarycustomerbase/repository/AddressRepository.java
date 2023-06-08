@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Integer> {
     List<Address> findAll();
+
+    boolean existsByStreetAndCity(String street, String city);
+
+    <S extends Address> S save(S address);
 }

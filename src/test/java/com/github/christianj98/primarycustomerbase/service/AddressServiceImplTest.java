@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.service;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.entity.Address;
+import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,10 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,5 +63,31 @@ public class AddressServiceImplTest {
         assertThat(addressDtos).extracting(AddressDto::getCity).containsOnly(address.getCity());
     }
 
+    @Test
+    public void save_addressCreated() {
+        // given
+        when(addressRepository.existsByStreetAndCity(anyString(), anyString())).thenReturn(false);
+        when(addressRepository.save(any())).thenReturn(address);
+        when(addressMapperService.mapFrom(any(Address.class))).thenReturn(addressDto);
+        when(addressMapperService.mapFrom(any(AddressDto.class))).thenReturn(address);
 
+        // when
+        final AddressDto createdAddressDto = addressService.createAddress(addressDto);
+
+        // then
+        assertThat(createdAddressDto.getId()).isEqualTo(address.getId());
+        assertThat(createdAddressDto.getStreet()).isEqualTo(address.getStreet());
+        assertThat(createdAddressDto.getCity()).isEqualTo(address.getCity());
+    }
+
+    @Test
+    public void save_addressAlreadyExist() {
+        // given
+        when(addressRepository.existsByStreetAndCity(anyString(), anyString())).thenReturn(true);
+
+        // when + then
+        assertThatThrownBy(() -> addressService.createAddress(addressDto))
+                .isInstanceOf(ResourceAlreadyExistsException.class)
+                .hasMessageContainingAll(STREET, CITY);
+    }
 }
