@@ -20,10 +20,11 @@ The following requirements should be fulfilled in the project:
 - Write unit tests, end-to-end tests, integration tests, and lightweight integration tests using `@WebMvc`.
 - Use PostgreSQL as the database, running in Docker.
 - Configure Jenkins in Docker.
-
+- Test repositories using `@DataJpaTest`.
+- Set up additional databases for integration tests and end-to-end tests.
 ## Endpoints in Swagger
 
-http://localhost:8080/swagger-ui/#/
+[Swagger UI](http://localhost:8080/swagger-ui/#/)
 
 ## Technologies and Tools
 
@@ -67,6 +68,8 @@ The project includes various types of tests:
 - **End-to-End Tests**: These tests cover the entire application flow, simulating user interactions.
 - **Integration Tests**: These tests ensure the integration between different components of the application.
 - **Lightweight Integration Tests with `@WebMvc`**: These tests verify the integration with the web layer using the `@WebMvc` framework.
+- **Repository Tests with `@DataJpaTest`**: These tests specifically test the repositories using the `@DataJpaTest` annotation.
+
 
 ## Contributing
 
