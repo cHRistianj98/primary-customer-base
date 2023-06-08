@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.persistence.EntityNotFoundException;
 import java.net.URI;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -101,6 +103,35 @@ public class AddressControllerLightIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(header().doesNotExist("Location"));
+    }
+
+    @Test
+    @DisplayName("Find address by id and address was found")
+    public void findById_addressFound() throws Exception {
+        // given
+        when(addressService.findById(anyInt())).thenReturn(addressDto);
+
+        // when + then
+        mockMvc.perform(get(ADDRESSES_URI + "/{id}", addressDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.street").value(STREET))
+                .andExpect(jsonPath("$.city").value(CITY));
+    }
+
+    @Test
+    @DisplayName("Find address by id but address was not found")
+    public void findById_addressNotFound() throws Exception {
+        // given
+        int id = 999;
+        when(addressService.findById(anyInt())).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        mockMvc.perform(get(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
 }

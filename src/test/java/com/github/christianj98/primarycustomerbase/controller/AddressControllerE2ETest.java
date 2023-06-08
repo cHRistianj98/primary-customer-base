@@ -12,6 +12,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -92,5 +93,35 @@ public class AddressControllerE2ETest {
         assertThat(createdAddress.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(output).contains(addressDto.getStreet());
         assertThat(output).contains(addressDto.getCity());
+    }
+
+    @Test
+    @DisplayName("Find address by id and address is found")
+    public void findById_shouldFindAddress() {
+        // given
+        restTemplate.postForEntity(ADDRESSES_URI, addressDto, AddressDto.class);
+
+        // when
+        var response = restTemplate.getForEntity(ADDRESSES_URI + "/{id}", AddressDto.class, addressDto.getId());
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getStreet()).isEqualTo(addressDto.getStreet());
+        assertThat(response.getBody().getCity()).isEqualTo(addressDto.getCity());
+    }
+
+    @Test
+    @DisplayName("Find address by id but address was not found")
+    public void findById_returnNotFound(CapturedOutput output) {
+        // given
+        int id = 999;
+
+        // when
+        var response = restTemplate.getForEntity(ADDRESSES_URI + "/{id}", String.class, id);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(Integer.toString(id));
     }
 }

@@ -12,7 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
@@ -21,6 +23,7 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -89,5 +92,32 @@ public class AddressServiceImplTest {
         assertThatThrownBy(() -> addressService.createAddress(addressDto))
                 .isInstanceOf(ResourceAlreadyExistsException.class)
                 .hasMessageContainingAll(STREET, CITY);
+    }
+
+    @Test
+    public void findById_returnFoundAddress() {
+        // given
+        when(addressRepository.findById(anyInt())).thenReturn(Optional.of(address));
+        when(addressMapperService.mapFrom(any(Address.class))).thenReturn(addressDto);
+
+        // when
+        final AddressDto foundAddress = addressService.findById(address.getId());
+
+        // then
+        assertThat(foundAddress).isNotNull();
+        assertThat(foundAddress.getId()).isEqualTo(address.getId());
+        assertThat(foundAddress.getStreet()).isEqualTo(STREET);
+        assertThat(foundAddress.getCity()).isEqualTo(CITY);
+    }
+
+    @Test
+    public void findById_throwsEntityNotFoundException() {
+        // given
+        when(addressRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // when + then
+        assertThatThrownBy(() -> addressService.findById(address.getId()))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining(Integer.toString(address.getId()));
     }
 }

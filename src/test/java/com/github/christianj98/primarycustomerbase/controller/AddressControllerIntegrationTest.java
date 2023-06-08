@@ -104,4 +104,36 @@ public class AddressControllerIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(header().doesNotExist("Location"));
     }
+
+    @Test
+    @DisplayName("Find address by id and address was found")
+    public void findById_addressFound() throws Exception {
+        // given
+        address = addressRepository.save(address);
+
+        // when + then
+        mockMvc.perform(get(ADDRESSES_URI + "/{id}", address.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.street").value(STREET))
+                .andExpect(jsonPath("$.city").value(CITY));
+    }
+
+    @Test
+    @DisplayName("Find address by id but address was not found")
+    public void findById_addressNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        final String errorMessage = mockMvc.perform(get(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(errorMessage).isEqualTo("Address not found with given id: " + id);
+    }
 }

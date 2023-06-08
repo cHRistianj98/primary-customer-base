@@ -8,6 +8,7 @@ import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
@@ -31,5 +32,12 @@ public class AddressServiceImpl implements AddressService {
         }
         final Address address = addressRepository.save(addressMapperService.mapFrom(addressDto));
         return addressMapperService.mapFrom(address);
+    }
+
+    public AddressDto findById(final int id) {
+        return addressRepository.findById(id)
+                .map(addressMapperService::mapFrom)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(String.format("Address not found with given id: %s", id)));
     }
 }
