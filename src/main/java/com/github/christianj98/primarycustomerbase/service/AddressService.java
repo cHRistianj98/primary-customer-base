@@ -10,4 +10,6 @@ public interface AddressService {
     AddressDto createAddress(AddressDto addressDto);
 
     AddressDto findById(int id);
+
+    AddressDto update(AddressDto addressDto, int id);
 }

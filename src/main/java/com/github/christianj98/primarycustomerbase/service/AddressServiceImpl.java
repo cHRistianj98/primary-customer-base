@@ -7,6 +7,7 @@ import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -15,6 +16,7 @@ import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AddressServiceImpl implements AddressService {
     private final AddressRepository addressRepository;
     private final AddressMapperService addressMapperService;
@@ -39,5 +41,12 @@ public class AddressServiceImpl implements AddressService {
                 .map(addressMapperService::mapFrom)
                 .orElseThrow(() ->
                         new EntityNotFoundException(String.format("Address not found with given id: %s", id)));
+    }
+
+    public AddressDto update(final AddressDto addressDto, final int id) {
+        Address address = addressRepository.getReferenceById(id);
+        address.setStreet(addressDto.getStreet());
+        address.setCity(addressDto.getCity());
+        return addressMapperService.mapFrom(address);
     }
 }

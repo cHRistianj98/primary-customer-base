@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -130,6 +131,38 @@ public class AddressControllerLightIntegrationTest {
         // when + then
         mockMvc.perform(get(ADDRESSES_URI + "/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update address with given id")
+    public void updateAddress_addressUpdated() throws Exception {
+        // given
+        int id = 1;
+        when(addressService.update(any(), anyInt())).thenReturn(addressDto);
+
+        // when + then
+        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(addressDto)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.street").value(addressDto.getStreet()))
+                .andExpect(jsonPath("$.city").value(addressDto.getCity()));
+    }
+
+    @Test
+    @DisplayName("Update address with given id but address not found")
+    public void updateAddress_addressNotFound() throws Exception {
+        // given
+        int id = 1;
+        when(addressService.update(any(), anyInt())).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(addressDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }

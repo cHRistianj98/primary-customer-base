@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -135,5 +136,38 @@ public class AddressControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
         assertThat(errorMessage).isEqualTo("Address not found with given id: " + id);
+    }
+
+    @Test
+    @DisplayName("Update address with given id")
+    public void updateAddress_addressUpdated() throws Exception {
+        // given
+        addressRepository.save(address);
+        int id = 1;
+        final AddressDto addressToUpdate = createAddressDto("Perla", "Perl");
+
+        // when + then
+        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(addressToUpdate)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.street").value(addressToUpdate.getStreet()))
+                .andExpect(jsonPath("$.city").value(addressToUpdate.getCity()));
+
+    }
+
+    @Test
+    @DisplayName("Update address with given id but address not found")
+    public void updateAddress_addressNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(addressDto)))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }

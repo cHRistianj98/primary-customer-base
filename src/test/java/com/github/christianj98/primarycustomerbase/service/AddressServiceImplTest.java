@@ -120,4 +120,33 @@ public class AddressServiceImplTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining(Integer.toString(address.getId()));
     }
+
+    @Test
+    public void update_addressUpdated() {
+        // given
+        int id = 1;
+        final AddressDto addressToUpdate = new AddressDto();
+        addressToUpdate.setStreet("Polna");
+        addressToUpdate.setCity("Warsaw");
+        when(addressRepository.getReferenceById(anyInt())).thenReturn(address);
+        when(addressMapperService.mapFrom(any(Address.class))).thenReturn(addressToUpdate);
+
+        // when
+        final AddressDto updatedAddress = addressService.update(addressToUpdate, id);
+
+        // then
+        assertThat(updatedAddress.getStreet()).isEqualTo(addressToUpdate.getStreet());
+        assertThat(updatedAddress.getCity()).isEqualTo(addressToUpdate.getCity());
+    }
+
+    @Test
+    public void update_addressNotFound() {
+        // given
+        int id = 999;
+        when(addressRepository.getReferenceById(anyInt())).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        assertThatThrownBy(() -> addressService.update(addressDto, id))
+                .isInstanceOf(EntityNotFoundException.class);
+    }
 }

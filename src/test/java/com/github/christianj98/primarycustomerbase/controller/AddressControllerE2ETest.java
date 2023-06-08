@@ -11,8 +11,11 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -123,5 +126,55 @@ public class AddressControllerE2ETest {
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(output).contains(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Update address with given id")
+    public void updateAddress_addressUpdated() {
+        // given
+        restTemplate.postForEntity(ADDRESSES_URI, addressDto, AddressDto.class);
+        int id = 1;
+        final AddressDto addressToUpdate = createAddressDto("Perla", "Perl");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddressDto> requestEntity = new HttpEntity<>(addressToUpdate, headers);
+
+        // when
+        var response = restTemplate.exchange(
+                ADDRESSES_URI + "/{id}",
+                HttpMethod.PUT,
+                requestEntity,
+                AddressDto.class,
+                id
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        final AddressDto updatedAddress = response.getBody();
+        assertThat(updatedAddress).isNotNull();
+        assertThat(updatedAddress.getStreet()).isEqualTo(addressToUpdate.getStreet());
+        assertThat(updatedAddress.getCity()).isEqualTo(addressToUpdate.getCity());
+    }
+
+    @Test
+    @DisplayName("Update address with given id but address not found")
+    public void updateAddress_addressNotFound() {
+        // given
+        restTemplate.postForEntity(ADDRESSES_URI, addressDto, AddressDto.class);
+        int id = 999;
+        final AddressDto addressToUpdate = createAddressDto("Perla", "Perl");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AddressDto> requestEntity = new HttpEntity<>(addressToUpdate, headers);
+
+        // when
+        var response = restTemplate.exchange(
+                ADDRESSES_URI + "/{id}",
+                HttpMethod.PUT,
+                requestEntity,
+                String.class,
+                id
+        );
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }
