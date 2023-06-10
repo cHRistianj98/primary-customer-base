@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.service;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.entity.Address;
+import com.github.christianj98.primarycustomerbase.exception.AddressAssignedToTheCustomerException;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
@@ -20,12 +21,16 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -148,5 +153,45 @@ public class AddressServiceImplTest {
         // when + then
         assertThatThrownBy(() -> addressService.update(addressDto, id))
                 .isInstanceOf(EntityNotFoundException.class);
+    }
+
+    @Test
+    public void delete_addressNotFound() {
+        // given
+        int id = 999;
+        when(addressRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // when + then
+        assertThatThrownBy(() -> addressService.delete(id))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining(Integer.toString(id));
+    }
+
+    @Test
+    public void delete_cannotDeleteAddressBecauseIsAssignedToTheCustomer() {
+        // given
+        int id = 1;
+        address.setCustomer(createCustomer(FIRST_NAME, LAST_NAME));
+        when(addressRepository.findById(anyInt())).thenReturn(Optional.of(address));
+
+        // when
+        assertThatThrownBy(() -> addressService.delete(id))
+                .isInstanceOf(AddressAssignedToTheCustomerException.class)
+                .hasMessageContaining("address is assigned to the customer");
+
+    }
+
+    @Test
+    public void delete_addressDeleted() {
+        // given
+        int id = 1;
+        address.setCustomer(null);
+        when(addressRepository.findById(anyInt())).thenReturn(Optional.of(address));
+
+        // when
+        addressService.delete(id);
+
+        // then
+        verify(addressRepository).delete(address);
     }
 }

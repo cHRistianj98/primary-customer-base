@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.service;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.entity.Address;
+import com.github.christianj98.primarycustomerbase.exception.AddressAssignedToTheCustomerException;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.mapper.AddressMapperService;
 import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
@@ -12,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
+import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR;
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.CUSTOMER_ALREADY_EXIST_ERROR;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +51,15 @@ public class AddressServiceImpl implements AddressService {
         address.setStreet(addressDto.getStreet());
         address.setCity(addressDto.getCity());
         return addressMapperService.mapFrom(address);
+    }
+
+    public void delete(final int id) {
+        final Address address = addressRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Address not found with given id: %s", id)));
+
+        if (nonNull(address.getCustomer())) {
+            throw new AddressAssignedToTheCustomerException(ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR.getMessage());
+        }
+        addressRepository.delete(address);
     }
 }

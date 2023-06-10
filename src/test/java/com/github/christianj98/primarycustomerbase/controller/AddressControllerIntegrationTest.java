@@ -2,7 +2,9 @@ package com.github.christianj98.primarycustomerbase.controller;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
 import com.github.christianj98.primarycustomerbase.entity.Address;
+import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.repository.AddressRepository;
+import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,14 +19,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.net.URI;
 
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_URI;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_WITH_ID_URI;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddress;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.asJsonString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -44,6 +51,9 @@ public class AddressControllerIntegrationTest {
 
     @Autowired
     private AddressRepository addressRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     private Address address;
 
@@ -113,7 +123,7 @@ public class AddressControllerIntegrationTest {
         address = addressRepository.save(address);
 
         // when + then
-        mockMvc.perform(get(ADDRESSES_URI + "/{id}", address.getId())
+        mockMvc.perform(get(ADDRESSES_WITH_ID_URI, address.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -128,7 +138,7 @@ public class AddressControllerIntegrationTest {
         int id = 999;
 
         // when + then
-        final String errorMessage = mockMvc.perform(get(ADDRESSES_URI + "/{id}", id)
+        final String errorMessage = mockMvc.perform(get(ADDRESSES_WITH_ID_URI, id)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isNotFound())
@@ -147,7 +157,7 @@ public class AddressControllerIntegrationTest {
         final AddressDto addressToUpdate = createAddressDto("Perla", "Perl");
 
         // when + then
-        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+        mockMvc.perform(put(ADDRESSES_WITH_ID_URI, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(addressToUpdate)))
                 .andDo(print())
@@ -164,10 +174,55 @@ public class AddressControllerIntegrationTest {
         int id = 999;
 
         // when + then
-        mockMvc.perform(put(ADDRESSES_URI + "/{id}", id)
+        mockMvc.perform(put(ADDRESSES_WITH_ID_URI, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(addressDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Address not found during deletion of address")
+    public void deleteAddress_addressNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        final String errorMessage = mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(errorMessage).contains(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Address is already assigned to the customer and cannot be deleted")
+    public void deleteAddress_addressAlreadyAssignedToTheCustomer() throws Exception {
+        // given
+        final Customer createdCustomer = customerRepository.save(createCustomer(FIRST_NAME, LAST_NAME));
+        final int addressId = createdCustomer.getAddress().getId();
+
+        // when
+        mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, addressId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("Address is deleted successfully")
+    public void deleteAddress_addressDeleted() throws Exception {
+        // given
+        address = addressRepository.save(address);
+
+        // when
+        mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, address.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+        assertThat(addressRepository.existsById(address.getId())).isFalse();
     }
 }

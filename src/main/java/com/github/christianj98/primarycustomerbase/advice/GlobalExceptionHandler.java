@@ -1,5 +1,6 @@
 package com.github.christianj98.primarycustomerbase.advice;
 
+import com.github.christianj98.primarycustomerbase.exception.AddressAssignedToTheCustomerException;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,5 +23,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
         log.warn(e.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    }
+
+    @ExceptionHandler(AddressAssignedToTheCustomerException.class)
+    public ResponseEntity<String> handleAddressAssignedToTheCustomerException(AddressAssignedToTheCustomerException e) {
+        log.warn(e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }

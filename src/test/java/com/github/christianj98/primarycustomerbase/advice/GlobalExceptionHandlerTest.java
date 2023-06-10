@@ -1,5 +1,6 @@
 package com.github.christianj98.primarycustomerbase.advice;
 
+import com.github.christianj98.primarycustomerbase.exception.AddressAssignedToTheCustomerException;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 
 import javax.persistence.EntityNotFoundException;
 
+import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -49,6 +51,21 @@ public class GlobalExceptionHandlerTest {
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(errorMessage);
+    }
+
+    @Test
+    public void handleAddressAssignedToTheCustomerException_returnsConflictStatus(CapturedOutput output) {
+        // given
+        final String errorMessage = ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR.getMessage();
+        final AddressAssignedToTheCustomerException exception =
+                new AddressAssignedToTheCustomerException(errorMessage);
+
+        // when
+        var response = globalExceptionHandler.handleAddressAssignedToTheCustomerException(exception);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(output).contains(errorMessage);
     }
 }

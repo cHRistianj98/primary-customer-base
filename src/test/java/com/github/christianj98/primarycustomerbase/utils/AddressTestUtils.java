@@ -8,6 +8,7 @@ public class AddressTestUtils {
     public static final String CITY = "Wroclaw";
     public static final String HOST = "localhost";
     public static final String ADDRESSES_URI = "/addresses";
+    public static final String ADDRESSES_WITH_ID_URI = ADDRESSES_URI + "/{id}";
     public static final int RANDOM_INT = 1;
 
     private AddressTestUtils() {

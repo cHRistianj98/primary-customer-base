@@ -1,6 +1,7 @@
 package com.github.christianj98.primarycustomerbase.controller;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
+import com.github.christianj98.primarycustomerbase.exception.AddressAssignedToTheCustomerException;
 import com.github.christianj98.primarycustomerbase.exception.ResourceAlreadyExistsException;
 import com.github.christianj98.primarycustomerbase.service.AddressService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.util.List;
 
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_URI;
+import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_WITH_ID_URI;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
@@ -25,7 +27,9 @@ import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -165,6 +169,45 @@ public class AddressControllerLightIntegrationTest {
                         .content(asJsonString(addressDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Address not found during deletion of address")
+    public void deleteAddress_addressNotFound() throws Exception {
+        // given
+        int id = 999;
+        doThrow(EntityNotFoundException.class).when(addressService).delete(anyInt());
+
+
+        // when + then
+        mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Address is already assigned to the customer and cannot be deleted")
+    public void deleteAddress_addressAlreadyAssignedToTheCustomer() throws Exception {
+        // given
+        doThrow(AddressAssignedToTheCustomerException.class).when(addressService).delete(anyInt());
+        int addressId = 1;
+
+        // when
+        mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, addressId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    @DisplayName("Address is deleted successfully")
+    public void deleteAddress_addressDeleted() throws Exception {
+        // when + then
+        mockMvc.perform(delete(ADDRESSES_WITH_ID_URI, addressDto.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 
 }

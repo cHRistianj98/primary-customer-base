@@ -12,4 +12,6 @@ public interface AddressService {
     AddressDto findById(int id);
 
     AddressDto update(AddressDto addressDto, int id);
+
+    void delete(int id);
 }

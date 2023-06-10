@@ -1,6 +1,7 @@
 package com.github.christianj98.primarycustomerbase.controller;
 
 import com.github.christianj98.primarycustomerbase.dto.AddressDto;
+import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,11 +23,16 @@ import org.springframework.test.context.ActiveProfiles;
 import java.net.URI;
 import java.util.List;
 
+import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_URI;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
+import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
@@ -176,5 +182,60 @@ public class AddressControllerE2ETest {
                 id
         );
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Address not found during deletion of address")
+    public void deleteAddress_addressNotFound(CapturedOutput output) {
+        // given
+        int id = 999;
+
+        // when
+        var response = restTemplate.exchange(ADDRESSES_URI + "/{id}",
+                HttpMethod.DELETE,
+                null,
+                String.class,
+                id);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(Integer.toString(id));
+    }
+
+    @Test
+    @DisplayName("Address is already assigned to the customer and cannot be deleted")
+    public void deleteAddress_addressAlreadyAssignedToTheCustomer(CapturedOutput output) {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, createCustomerDto(FIRST_NAME, LAST_NAME), CustomerDto.class);
+        int addressId = 1;
+
+        // when
+        var response = restTemplate.exchange(ADDRESSES_URI + "/{id}",
+                HttpMethod.DELETE,
+                null,
+                String.class,
+                addressId);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(output).contains(ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR.getMessage());
+    }
+
+    @Test
+    @DisplayName("Address is deleted successfully")
+    public void deleteAddress_addressDeleted() {
+        // given
+        restTemplate.postForEntity(ADDRESSES_URI, addressDto, AddressDto.class);
+        int id = 1;
+
+        // when
+        var response = restTemplate.exchange(ADDRESSES_URI + "/{id}",
+                HttpMethod.DELETE,
+                null,
+                Void.class,
+                id);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 }
