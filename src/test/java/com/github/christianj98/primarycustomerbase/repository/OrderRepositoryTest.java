@@ -44,4 +44,16 @@ public class OrderRepositoryTest {
         assertThat(orders).extracting(Order::getDate, Order::getAmount)
                 .isEqualTo(List.of(Tuple.tuple(order.getDate(), order.getAmount())));
     }
+
+    @Test
+    public void whenSaveOrder_theReturnCreatedOrder() {
+        // when
+        final Order savedOrder = orderRepository.save(order);
+
+        // then
+        assertThat(savedOrder.getId()).isEqualTo(order.getId());
+        assertThat(savedOrder.getDate()).isEqualTo(order.getDate());
+        assertThat(savedOrder.getAmount()).isEqualTo(order.getAmount());
+        assertThat(savedOrder.getCustomer()).isEqualTo(order.getCustomer());
+    }
 }

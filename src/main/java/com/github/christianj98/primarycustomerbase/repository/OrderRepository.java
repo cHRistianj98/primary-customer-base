@@ -11,4 +11,6 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order o JOIN FETCH o.customer c JOIN FETCH c.address a")
     List<Order> findAllWithCustomerAndAddress();
+
+    <S extends Order> S save(S entity);
 }

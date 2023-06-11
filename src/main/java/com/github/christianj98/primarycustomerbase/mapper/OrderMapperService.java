@@ -21,6 +21,7 @@ public class OrderMapperService {
 
     public OrderDto mapFrom(Order order) {
         OrderDto orderDto = new OrderDto();
+        orderDto.setOrderId(order.getId());
         orderDto.setDate(order.getDate());
         orderDto.setAmount(order.getAmount());
         orderDto.setCustomerDto(customerMapperService.mapFrom(order.getCustomer()));

@@ -48,6 +48,7 @@ public class OrderMapperServiceTest {
         final OrderDto orderDto = orderMapperService.mapFrom(order);
 
         // then
+        assertThat(orderDto.getOrderId()).isEqualTo(order.getId());
         assertThat(orderDto.getDate()).isEqualTo(order.getDate());
         assertThat(orderDto.getAmount()).isEqualTo(order.getAmount());
         assertThat(orderDto.getCustomerDto()).isEqualTo(customerDto);
@@ -67,10 +68,12 @@ public class OrderMapperServiceTest {
 
         // then
         assertThat(orderDtos).isNotEmpty();
-        assertThat(orderDtos).extracting(OrderDto::getDate,
+        assertThat(orderDtos).extracting(OrderDto::getOrderId,
+                        OrderDto::getDate,
                         OrderDto::getAmount,
                         OrderDto::getCustomerDto)
-                .isEqualTo(List.of(Tuple.tuple(order.getDate(),
+                .isEqualTo(List.of(Tuple.tuple(order.getId(),
+                        order.getDate(),
                         order.getAmount(),
                         customerDto)));
     }

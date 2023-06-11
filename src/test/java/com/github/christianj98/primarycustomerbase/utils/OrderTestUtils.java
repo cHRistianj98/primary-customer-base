@@ -1,5 +1,6 @@
 package com.github.christianj98.primarycustomerbase.utils;
 
+import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
 import com.github.christianj98.primarycustomerbase.entity.Order;
 
@@ -25,6 +26,16 @@ public class OrderTestUtils {
         orderDto.setDate(orderDate);
         orderDto.setAmount(amount);
         orderDto.setCustomerDto(createCustomerDto(FIRST_NAME, LAST_NAME));
+        return orderDto;
+    }
+
+    public static OrderCreateDto createOrderCreateDto(final LocalDateTime orderDate,
+                                                      final BigDecimal amount,
+                                                      final int customerId) {
+        OrderCreateDto orderDto = new OrderCreateDto();
+        orderDto.setDate(orderDate);
+        orderDto.setAmount(amount);
+        orderDto.setCustomerId(customerId);
         return orderDto;
     }
 
