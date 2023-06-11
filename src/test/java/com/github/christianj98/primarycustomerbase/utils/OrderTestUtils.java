@@ -12,7 +12,7 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 
 public class OrderTestUtils {
-    public static final LocalDateTime ORDER_DATE = LocalDateTime.of(2020, 2, 3, 1, 2);
+    public static final LocalDateTime ORDER_DATE = LocalDateTime.of(2020, 2, 3, 1, 2, 4);
     public static final BigDecimal AMOUNT = new BigDecimal("999.99");
     public static final String ORDERS_URI = "/orders";
 
