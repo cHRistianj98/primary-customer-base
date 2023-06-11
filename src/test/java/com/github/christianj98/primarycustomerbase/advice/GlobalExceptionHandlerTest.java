@@ -11,6 +11,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.HttpStatus;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,5 +68,18 @@ public class GlobalExceptionHandlerTest {
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(output).contains(errorMessage);
+    }
+
+    @Test
+    public void handleConstraintViolationException_returnsBadRequestStatus(CapturedOutput output) {
+        // given
+        final ConstraintViolationException exception = new ConstraintViolationException(null);
+
+        // when
+        var response = globalExceptionHandler.handleConstraintViolationException(exception);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(output).contains("null");
     }
 }

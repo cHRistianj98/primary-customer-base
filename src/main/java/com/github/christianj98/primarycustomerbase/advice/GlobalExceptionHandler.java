@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 @Slf4j
@@ -29,5 +30,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAddressAssignedToTheCustomerException(AddressAssignedToTheCustomerException e) {
         log.warn(e.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
+        log.warn(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 }
