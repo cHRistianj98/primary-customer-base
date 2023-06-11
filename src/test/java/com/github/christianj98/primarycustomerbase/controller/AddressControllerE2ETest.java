@@ -26,13 +26,13 @@ import java.util.List;
 import static com.github.christianj98.primarycustomerbase.message.ErrorMessages.ADDRESS_ASSIGNED_TO_THR_CUSTOMER_ERROR;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.ADDRESSES_URI;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.CITY;
-import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.createAddressDto;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
+import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.HOST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 

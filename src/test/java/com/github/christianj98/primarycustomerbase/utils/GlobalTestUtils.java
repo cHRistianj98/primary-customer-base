@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GlobalTestUtils {
+    public static final String HOST = "localhost";
     public static String asJsonString(Object object) {
 
         ObjectMapper objectMapper = new ObjectMapper();

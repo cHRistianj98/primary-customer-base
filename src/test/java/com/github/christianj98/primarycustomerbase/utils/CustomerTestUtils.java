@@ -11,7 +11,6 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 public class CustomerTestUtils {
     public static final String FIRST_NAME = "Jan";
     public static final String LAST_NAME = "Kowalski";
-    public static final String HOST = "localhost";
     public static final String CUSTOMERS_URI = "/customers";
 
     private CustomerTestUtils() {

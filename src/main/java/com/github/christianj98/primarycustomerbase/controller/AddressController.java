@@ -22,7 +22,7 @@ import java.util.List;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @RestController
-@RequestMapping("addresses")
+@RequestMapping("/addresses")
 @RequiredArgsConstructor
 @Api(tags = "Address Controller")
 public class AddressController {

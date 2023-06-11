@@ -24,7 +24,7 @@ import java.util.List;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 @RestController
-@RequestMapping(path = "customers")
+@RequestMapping(path = "/customers")
 @RequiredArgsConstructor
 @Api(tags = "Customer Controller")
 public class CustomerController {

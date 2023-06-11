@@ -28,9 +28,9 @@ import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils
 import static com.github.christianj98.primarycustomerbase.utils.AddressTestUtils.STREET;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.CUSTOMERS_URI;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
-import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
+import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.HOST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 
