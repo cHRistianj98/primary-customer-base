@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.controller;
 
 import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
+import com.github.christianj98.primarycustomerbase.dto.OrderUpdateDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +28,17 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.O
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderUpdateDto;
 import static java.lang.String.valueOf;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,6 +54,7 @@ public class OrderControllerLightIntegrationTest {
     private OrderDto orderDto;
     private OrderCreateDto orderCreateDto;
     private Customer customer;
+    private OrderUpdateDto orderUpdateDto;
 
     @BeforeEach
     public void init() {
@@ -56,6 +62,7 @@ public class OrderControllerLightIntegrationTest {
         orderDto = createOrderDto(ORDER_DATE, AMOUNT);
         orderCreateDto = createOrderCreateDto(ORDER_DATE, AMOUNT, customerId);
         customer = createCustomer(FIRST_NAME, LAST_NAME);
+        orderUpdateDto = createOrderUpdateDto();
     }
 
     @Test
@@ -132,6 +139,40 @@ public class OrderControllerLightIntegrationTest {
         // when + then
         mockMvc.perform(get(ORDERS_URI_WITH_ID, ID)
                         .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update order with specific id")
+    public void updateOrder_orderUpdatedSuccessfully() throws Exception {
+        // given
+        when(orderService.update(any(), anyInt())).thenReturn(orderDto);
+
+        // when + then
+        mockMvc.perform(put(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON)
+                        .content(asJsonString(orderUpdateDto)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.amount").value(valueOf(orderDto.getAmount())))
+                .andExpect(jsonPath("$.date").value(valueOf(orderDto.getDate())))
+                .andExpect(jsonPath("$.customerDto.firstName").value(customer.getFirstName()))
+                .andExpect(jsonPath("$.customerDto.lastName").value(customer.getLastName()));
+    }
+
+    @Test
+    @DisplayName("Update order but order does not exist")
+    public void updateOrder_orderNotFound() throws Exception {
+        // given
+        when(orderService.update(any(), anyInt())).thenThrow(EntityNotFoundException.class);
+
+
+        // when + then
+        mockMvc.perform(put(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON)
+                        .content(asJsonString(orderUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }

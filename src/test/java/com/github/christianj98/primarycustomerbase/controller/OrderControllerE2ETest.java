@@ -3,6 +3,7 @@ package com.github.christianj98.primarycustomerbase.controller;
 import com.github.christianj98.primarycustomerbase.dto.CustomerDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
+import com.github.christianj98.primarycustomerbase.dto.OrderUpdateDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,11 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,6 +37,7 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.O
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderUpdateDto;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -47,6 +53,7 @@ public class OrderControllerE2ETest {
     private OrderDto orderDto;
     private OrderCreateDto orderCreateDto;
     private CustomerDto customerDto;
+    private OrderUpdateDto orderUpdateDto;
 
     @BeforeEach
     public void init() {
@@ -54,6 +61,7 @@ public class OrderControllerE2ETest {
         orderDto = createOrderDto(ORDER_DATE, AMOUNT);
         orderCreateDto = createOrderCreateDto(ORDER_DATE, AMOUNT, customerId);
         customerDto = createCustomerDto(FIRST_NAME, LAST_NAME);
+        orderUpdateDto = createOrderUpdateDto();
     }
 
     @Test
@@ -137,4 +145,61 @@ public class OrderControllerE2ETest {
         assertThat(output).contains(String.valueOf(ID));
         assertThat(response.getBody()).contains(String.valueOf(ID));
     }
+
+    @Test
+    @DisplayName("Update order with specific id")
+    public void updateOrder_orderUpdatedSuccessfully() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+        orderCreateDto.setCustomerId(ID);
+        restTemplate.postForEntity(ORDERS_URI, orderCreateDto, OrderDto.class);
+        HttpEntity<OrderUpdateDto> requestEntity = createRequestEntity();
+
+        // when
+        var response = restTemplate.exchange(
+                ORDERS_URI_WITH_ID,
+                HttpMethod.PUT,
+                requestEntity,
+                OrderDto.class,
+                ID
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        final OrderDto updatedOrder = response.getBody();
+        assertThat(updatedOrder.getOrderId()).isEqualTo(ID);
+        assertThat(updatedOrder.getDate()).isEqualTo(orderUpdateDto.getDate());
+        assertThat(updatedOrder.getAmount()).isEqualTo(orderUpdateDto.getAmount());
+    }
+
+    @Test
+    @DisplayName("Update order but order does not exist")
+    public void updateOrder_orderNotFound(CapturedOutput output) {
+        // given
+        int id = 999;
+        HttpEntity<OrderUpdateDto> requestEntity = createRequestEntity();
+
+        // when
+        var response = restTemplate.exchange(
+                ORDERS_URI_WITH_ID,
+                HttpMethod.PUT,
+                requestEntity,
+                String.class,
+                id
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(String.valueOf(id));
+        assertThat(response.getBody()).contains(String.valueOf(id));
+    }
+
+    private HttpEntity<OrderUpdateDto> createRequestEntity() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<OrderUpdateDto> requestEntity = new HttpEntity<>(orderUpdateDto, headers);
+        return requestEntity;
+    }
+
 }

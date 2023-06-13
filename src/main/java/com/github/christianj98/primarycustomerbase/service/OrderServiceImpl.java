@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.service;
 
 import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
+import com.github.christianj98.primarycustomerbase.dto.OrderUpdateDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
 import com.github.christianj98.primarycustomerbase.entity.Order;
 import com.github.christianj98.primarycustomerbase.mapper.OrderMapperService;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -47,5 +49,21 @@ public class OrderServiceImpl implements OrderService {
                 .map(orderMapperService::mapFrom)
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Order not found with given id: %s", id)));
+    }
+
+    @Override
+    public OrderDto update(final OrderUpdateDto orderUpdateDto, final int id) {
+        return orderRepository.findById(id)
+                .map(mapOrder(orderUpdateDto))
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Order not found with given id: %s", id)));
+    }
+
+    private Function<Order, OrderDto> mapOrder(final OrderUpdateDto orderUpdateDto) {
+        return order -> {
+            order.setAmount(orderUpdateDto.getAmount());
+            order.setDate(orderUpdateDto.getDate());
+            return orderMapperService.mapFrom(order);
+        };
     }
 }

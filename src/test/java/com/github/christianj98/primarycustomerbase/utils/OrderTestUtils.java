@@ -2,6 +2,7 @@ package com.github.christianj98.primarycustomerbase.utils;
 
 import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
+import com.github.christianj98.primarycustomerbase.dto.OrderUpdateDto;
 import com.github.christianj98.primarycustomerbase.entity.Order;
 
 import java.math.BigDecimal;
@@ -48,6 +49,13 @@ public class OrderTestUtils {
         order.setAmount(amount);
         order.setCustomer(createCustomer(FIRST_NAME, LAST_NAME));
         return order;
+    }
+
+    public static OrderUpdateDto createOrderUpdateDto() {
+        final OrderUpdateDto orderUpdateDto = new OrderUpdateDto();
+        orderUpdateDto.setAmount(new BigDecimal("2137.02"));
+        orderUpdateDto.setDate(LocalDateTime.of(2000, 10, 10, 10, 10, 10));
+        return orderUpdateDto;
     }
 
 }
