@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.FIRST_NAME;
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.LAST_NAME;
@@ -55,5 +56,18 @@ public class OrderRepositoryTest {
         assertThat(savedOrder.getDate()).isEqualTo(order.getDate());
         assertThat(savedOrder.getAmount()).isEqualTo(order.getAmount());
         assertThat(savedOrder.getCustomer()).isEqualTo(order.getCustomer());
+    }
+
+    @Test
+    public void whenFindById_thenReturnOrder() {
+        // when
+        final Optional<Order> foundOrder = orderRepository.findById(order.getId());
+
+        // then
+        assertThat(foundOrder).isPresent();
+        assertThat(foundOrder.get().getId()).isEqualTo(order.getId());
+        assertThat(foundOrder.get().getDate()).isEqualTo(order.getDate());
+        assertThat(foundOrder.get().getAmount()).isEqualTo(order.getAmount());
+        assertThat(foundOrder.get().getCustomer()).isEqualTo(order.getCustomer());
     }
 }

@@ -9,4 +9,6 @@ public interface OrderService {
     List<OrderDto> findAll();
 
     OrderDto saveOrder(OrderCreateDto orderCreateDto);
+
+    OrderDto findById(int id);
 }

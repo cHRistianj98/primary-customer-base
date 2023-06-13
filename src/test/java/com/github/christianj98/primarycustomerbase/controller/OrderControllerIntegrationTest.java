@@ -3,7 +3,9 @@ package com.github.christianj98.primarycustomerbase.controller;
 import com.github.christianj98.primarycustomerbase.dto.OrderCreateDto;
 import com.github.christianj98.primarycustomerbase.dto.OrderDto;
 import com.github.christianj98.primarycustomerbase.entity.Customer;
+import com.github.christianj98.primarycustomerbase.entity.Order;
 import com.github.christianj98.primarycustomerbase.repository.CustomerRepository;
+import com.github.christianj98.primarycustomerbase.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,10 +21,15 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.asJsonString;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.AMOUNT;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI_WITH_ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrder;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
+import static java.lang.String.valueOf;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,8 +46,11 @@ public class OrderControllerIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private OrderRepository orderRepository;
 
     private OrderDto orderDto;
+    private Order order;
     private OrderCreateDto orderCreateDto;
     private Customer customer;
 
@@ -50,6 +60,7 @@ public class OrderControllerIntegrationTest {
         orderDto = createOrderDto(ORDER_DATE, AMOUNT);
         orderCreateDto = createOrderCreateDto(ORDER_DATE, AMOUNT, customerId);
         customer = createCustomer(FIRST_NAME, LAST_NAME);
+        order = createOrder(ORDER_DATE, AMOUNT);
     }
 
     @Test
@@ -88,7 +99,38 @@ public class OrderControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.date").value(orderCreateDto.getDate().toString()))
                 .andExpect(jsonPath("$.amount").value(orderCreateDto.getAmount().toString()));
+    }
 
+    @Test
+    @DisplayName("Find order by id")
+    public void findOrderById_orderFound() throws Exception {
+        // given
+        customerRepository.save(customer);
+        orderRepository.save(order);
+
+        // when + then
+        mockMvc.perform(get(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(valueOf(order.getAmount())))
+                .andExpect(jsonPath("$.date").value(valueOf(order.getDate())))
+                .andExpect(jsonPath("$.customerDto.firstName").value(customer.getFirstName()))
+                .andExpect(jsonPath("$.customerDto.lastName").value(customer.getLastName()));
+    }
+
+    @Test
+    @DisplayName("Find order by id but order does not exist")
+    public void findOrderById_orderNotFound() throws Exception {
+        // when + then
+        final String responseBody = mockMvc.perform(get(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        assertThat(responseBody).isEqualTo("Order not found with given id: " + ID);
     }
 
 }

@@ -16,6 +16,9 @@ public class OrderTestUtils {
     public static final LocalDateTime ORDER_DATE = LocalDateTime.of(2020, 2, 3, 1, 2, 4);
     public static final BigDecimal AMOUNT = new BigDecimal("999.99");
     public static final String ORDERS_URI = "/orders";
+    public static final String ORDERS_URI_WITH_ID = "/orders/{id}";
+    public static final int ID = 1;
+
 
     private OrderTestUtils() {
         // private

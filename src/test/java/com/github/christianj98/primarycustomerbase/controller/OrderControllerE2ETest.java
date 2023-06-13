@@ -26,7 +26,9 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomerDto;
 import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.HOST;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.AMOUNT;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI_WITH_ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
@@ -84,7 +86,7 @@ public class OrderControllerE2ETest {
     public void saveOrder_customerExist_OrderCreated() {
         // given
         restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
-        orderCreateDto.setCustomerId(1);
+        orderCreateDto.setCustomerId(ID);
 
         // when
         var response = restTemplate.postForEntity(ORDERS_URI, orderCreateDto, OrderDto.class);
@@ -102,5 +104,37 @@ public class OrderControllerE2ETest {
         assertThat(location.getPath()).contains(ORDERS_URI);
         assertThat(location.getHost()).isEqualTo(HOST);
         assertThat(location.getPort()).isEqualTo(port);
+    }
+
+    @Test
+    @DisplayName("Find order by id")
+    public void findOrderById_orderFound() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+        orderCreateDto.setCustomerId(ID);
+        restTemplate.postForEntity(ORDERS_URI, orderCreateDto, OrderDto.class);
+
+        // when
+        var response = restTemplate.getForEntity(ORDERS_URI_WITH_ID, OrderDto.class, ID);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        final OrderDto foundOrder = response.getBody();
+        assertThat(foundOrder.getOrderId()).isEqualTo(ID);
+        assertThat(foundOrder.getDate()).isEqualTo(orderCreateDto.getDate());
+        assertThat(foundOrder.getAmount()).isEqualTo(orderCreateDto.getAmount());
+    }
+
+    @Test
+    @DisplayName("Find order by id but order does not exist")
+    public void findOrderById_orderNotFound(CapturedOutput output) {
+        // when
+        var response = restTemplate.getForEntity(ORDERS_URI_WITH_ID, String.class, ID);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(String.valueOf(ID));
+        assertThat(response.getBody()).contains(String.valueOf(ID));
     }
 }

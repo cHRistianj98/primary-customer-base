@@ -21,10 +21,13 @@ import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtil
 import static com.github.christianj98.primarycustomerbase.utils.CustomerTestUtils.createCustomer;
 import static com.github.christianj98.primarycustomerbase.utils.GlobalTestUtils.asJsonString;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.AMOUNT;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDERS_URI_WITH_ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
+import static java.lang.String.valueOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -101,6 +104,36 @@ public class OrderControllerLightIntegrationTest {
                 .andExpect(jsonPath("$.date").value(orderCreateDto.getDate().toString()))
                 .andExpect(jsonPath("$.amount").value(orderCreateDto.getAmount().toString()));
 
+    }
+
+    @Test
+    @DisplayName("Find order by id")
+    public void findOrderById_orderFound() throws Exception {
+        // given
+        when(orderService.findById(ID)).thenReturn(orderDto);
+
+        // when + then
+        mockMvc.perform(get(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(valueOf(orderDto.getAmount())))
+                .andExpect(jsonPath("$.date").value(valueOf(orderDto.getDate())))
+                .andExpect(jsonPath("$.customerDto.firstName").value(customer.getFirstName()))
+                .andExpect(jsonPath("$.customerDto.lastName").value(customer.getLastName()));
+    }
+
+    @Test
+    @DisplayName("Find order by id but order does not exist")
+    public void findOrderById_orderNotFound() throws Exception {
+        // given
+        when(orderService.findById(ID)).thenThrow(EntityNotFoundException.class);
+
+        // when + then
+        mockMvc.perform(get(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 
 }

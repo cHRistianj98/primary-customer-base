@@ -41,4 +41,11 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomer(customer);
         return order;
     }
+
+    public OrderDto findById(final int id) {
+        return orderRepository.findById(id)
+                .map(orderMapperService::mapFrom)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Order not found with given id: %s", id)));
+    }
 }

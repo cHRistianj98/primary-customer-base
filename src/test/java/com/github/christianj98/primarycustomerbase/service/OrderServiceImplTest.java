@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.AMOUNT;
+import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ID;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.ORDER_DATE;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrder;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
@@ -101,6 +102,38 @@ public class OrderServiceImplTest {
         assertThatThrownBy(() -> orderService.saveOrder(orderCreateDto))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Customer not found");
+    }
+
+    @Test
+    @DisplayName("Find order by id")
+    public void findById_orderFound() {
+        // given
+        when(orderRepository.findById(ID)).thenReturn(Optional.of(order));
+        when(orderMapperService.mapFrom(any(Order.class))).thenReturn(orderDto);
+
+        // when
+        final OrderDto foundOrder = orderService.findById(ID);
+
+        // then
+        assertThat(foundOrder.getOrderId()).isEqualTo(orderDto.getOrderId());
+        assertThat(foundOrder.getDate()).isEqualTo(orderDto.getDate());
+        assertThat(foundOrder.getAmount()).isEqualTo(orderDto.getAmount());
+        assertThat(foundOrder.getCustomerDto()).isEqualTo(orderDto.getCustomerDto());
+        verify(orderRepository).findById(eq(ID));
+        verify(orderMapperService).mapFrom(eq(order));
+    }
+
+    @Test
+    @DisplayName("Find order by id but order does not exist")
+    public void findById_orderNotFound() {
+        // given
+        when(orderRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        // when + then
+        assertThatThrownBy(() -> orderService.findById(ID))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Order not found")
+                .hasMessageContaining(String.valueOf(ID));
     }
 
 }
