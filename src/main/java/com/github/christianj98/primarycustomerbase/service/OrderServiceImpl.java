@@ -51,12 +51,18 @@ public class OrderServiceImpl implements OrderService {
                         String.format("Order not found with given id: %s", id)));
     }
 
-    @Override
     public OrderDto update(final OrderUpdateDto orderUpdateDto, final int id) {
         return orderRepository.findById(id)
                 .map(mapOrder(orderUpdateDto))
                 .orElseThrow(() -> new EntityNotFoundException(
                         String.format("Order not found with given id: %s", id)));
+    }
+
+    public void delete(final int id) {
+        if (!orderRepository.existsById(id)) {
+            throw new EntityNotFoundException(String.format("Order not found with given id: %s", id));
+        }
+        orderRepository.deleteById(id);
     }
 
     private Function<Order, OrderDto> mapOrder(final OrderUpdateDto orderUpdateDto) {

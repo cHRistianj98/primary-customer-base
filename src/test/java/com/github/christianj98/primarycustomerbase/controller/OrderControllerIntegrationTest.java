@@ -33,6 +33,7 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.c
 import static java.lang.String.valueOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -174,6 +175,36 @@ public class OrderControllerIntegrationTest {
                 .andReturn()
                 .getResponse().getContentAsString();
         assertThat(responseBody).contains(valueOf(id));
+    }
+
+    @Test
+    @DisplayName("Delete order but order was not found")
+    public void deleteOrder_orderNotFound() throws Exception {
+        // given
+        int id = 999;
+
+        // when + then
+        final String responseBody = mockMvc.perform(delete(ORDERS_URI_WITH_ID, id)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse().getContentAsString();
+        assertThat(responseBody).contains(valueOf(id));
+    }
+
+    @Test
+    @DisplayName("Delete order with specific id")
+    public void deleteOrder_orderDeleteSuccessfully() throws Exception {
+        // given
+        customerRepository.save(customer);
+        orderRepository.save(order);
+
+        // when + then
+        mockMvc.perform(delete(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 
 }

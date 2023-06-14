@@ -32,8 +32,11 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.c
 import static java.lang.String.valueOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -168,13 +171,39 @@ public class OrderControllerLightIntegrationTest {
         // given
         when(orderService.update(any(), anyInt())).thenThrow(EntityNotFoundException.class);
 
-
         // when + then
         mockMvc.perform(put(ORDERS_URI_WITH_ID, ID)
                         .contentType(APPLICATION_JSON)
                         .content(asJsonString(orderUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Delete order but order was not found")
+    public void deleteOrder_orderNotFound() throws Exception {
+        // given
+        int id = 999;
+        doThrow(EntityNotFoundException.class).when(orderService).delete(anyInt());
+
+        // when + then
+        mockMvc.perform(delete(ORDERS_URI_WITH_ID, id)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Delete order with specific id")
+    public void deleteOrder_orderDeleteSuccessfully() throws Exception {
+        // given
+        doNothing().when(orderService).delete(anyInt());
+
+        // when + then
+        mockMvc.perform(delete(ORDERS_URI_WITH_ID, ID)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNoContent());
     }
 
 }

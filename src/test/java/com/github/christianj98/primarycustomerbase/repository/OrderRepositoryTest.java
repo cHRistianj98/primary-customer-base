@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.c
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class OrderRepositoryTest {
     @Autowired
     private OrderRepository orderRepository;
@@ -69,5 +71,23 @@ public class OrderRepositoryTest {
         assertThat(foundOrder.get().getDate()).isEqualTo(order.getDate());
         assertThat(foundOrder.get().getAmount()).isEqualTo(order.getAmount());
         assertThat(foundOrder.get().getCustomer()).isEqualTo(order.getCustomer());
+    }
+
+    @Test
+    public void whenExistsById_thenReturnTrue() {
+        // when
+        final boolean orderExist = orderRepository.existsById(order.getId());
+
+        // then
+        assertThat(orderExist).isTrue();
+    }
+
+    @Test
+    public void whenDeleteById_orderIsDeleted() {
+        // when
+        orderRepository.deleteById(order.getId());
+
+        // then
+        assertThat(orderRepository.existsById(order.getId())).isFalse();
     }
 }

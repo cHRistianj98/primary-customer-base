@@ -16,4 +16,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     <S extends Order> S save(S entity);
 
     Optional<Order> findById(Integer integer);
+
+    boolean existsById(Integer integer);
+
+    void deleteById(Integer integer);
 }

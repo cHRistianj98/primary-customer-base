@@ -29,6 +29,7 @@ import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.c
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderCreateDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderDto;
 import static com.github.christianj98.primarycustomerbase.utils.OrderTestUtils.createOrderUpdateDto;
+import static java.lang.String.valueOf;
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -142,10 +143,11 @@ public class OrderServiceImplTest {
         assertThatThrownBy(() -> orderService.findById(ID))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Order not found")
-                .hasMessageContaining(String.valueOf(ID));
+                .hasMessageContaining(valueOf(ID));
     }
 
     @Test
+    @DisplayName("Update order")
     public void updateOrder_orderUpdatedSuccessfully() {
         // given
         when(orderRepository.findById(ID)).thenReturn(Optional.of(order));
@@ -161,6 +163,7 @@ public class OrderServiceImplTest {
     }
 
     @Test
+    @DisplayName("Update order but order was not found")
     public void updateOrder_orderNotFound() {
         // given
         when(orderRepository.findById(ID)).thenReturn(Optional.empty());
@@ -168,8 +171,32 @@ public class OrderServiceImplTest {
         // when + then
         assertThatThrownBy(() -> orderService.update(orderUpdateDto, ID))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining(String.valueOf(ID));
+                .hasMessageContaining(valueOf(ID));
         verifyNoInteractions(orderMapperService);
     }
 
+    @Test
+    @DisplayName("Delete order but order was not found")
+    public void deleteOrder_orderNotFound() {
+        // given
+        when(orderRepository.existsById(ID)).thenReturn(false);
+
+        // when + then
+        assertThatThrownBy(() -> orderService.delete(ID))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining(valueOf(ID));
+    }
+
+    @Test
+    @DisplayName("Delete order")
+    public void deleteOrder_orderWasDeleted() {
+        // given
+        when(orderRepository.existsById(ID)).thenReturn(true);
+
+        // when
+        orderService.delete(ID);
+
+        // then
+        verify(orderRepository).deleteById(ID);
+    }
 }

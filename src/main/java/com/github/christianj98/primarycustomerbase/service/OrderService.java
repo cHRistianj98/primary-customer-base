@@ -14,4 +14,6 @@ public interface OrderService {
     OrderDto findById(int id);
 
     OrderDto update(OrderUpdateDto orderUpdateDto, int id);
+
+    void delete(int id);
 }

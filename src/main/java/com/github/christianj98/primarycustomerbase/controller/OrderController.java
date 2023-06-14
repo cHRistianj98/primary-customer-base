@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,6 +58,13 @@ public class OrderController {
     public ResponseEntity<OrderDto> updateOrder(@RequestBody @Valid OrderUpdateDto orderUpdateDto,
                                                 @PathVariable int id) {
         return ResponseEntity.ok(orderService.update(orderUpdateDto, id));
+    }
+
+    @DeleteMapping("/{id}")
+    @ApiOperation("Delete order with given id")
+    public ResponseEntity<Void> deleteOrder(@PathVariable int id) {
+        orderService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -195,6 +195,53 @@ public class OrderControllerE2ETest {
         assertThat(response.getBody()).contains(String.valueOf(id));
     }
 
+    @Test
+    @DisplayName("Delete order but order was not found")
+    public void deleteOrder_orderNotFound(CapturedOutput output) {
+        // given
+        int id = 999;
+        HttpEntity<OrderUpdateDto> requestEntity = createRequestEntity();
+
+        // when
+        var response = restTemplate.exchange(
+                ORDERS_URI_WITH_ID,
+                HttpMethod.DELETE,
+                requestEntity,
+                String.class,
+                id
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(output).contains(String.valueOf(id));
+        assertThat(response.getBody()).contains(String.valueOf(id));
+    }
+
+    @Test
+    @DisplayName("Delete order with specific id")
+    public void deleteOrder_orderDeleteSuccessfully() {
+        // given
+        restTemplate.postForEntity(CUSTOMERS_URI, customerDto, CustomerDto.class);
+        orderCreateDto.setCustomerId(ID);
+        restTemplate.postForEntity(ORDERS_URI, orderCreateDto, OrderDto.class);
+        HttpEntity<OrderUpdateDto> requestEntity = createRequestEntity();
+
+        // when
+        var response = restTemplate.exchange(
+                ORDERS_URI_WITH_ID,
+                HttpMethod.DELETE,
+                requestEntity,
+                Void.class,
+                ID
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        var deletedOrderResponse = restTemplate.getForEntity(ORDERS_URI_WITH_ID, String.class, ID);
+        assertThat(deletedOrderResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+
     private HttpEntity<OrderUpdateDto> createRequestEntity() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
